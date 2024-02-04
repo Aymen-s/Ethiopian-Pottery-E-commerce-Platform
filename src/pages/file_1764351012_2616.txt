@@ -1,3 +1,0 @@
-// Created: Fri Nov 28 08:30:12 PM EAT 2025
-// Purpose: Add dark mode
-// Update 1764351013
