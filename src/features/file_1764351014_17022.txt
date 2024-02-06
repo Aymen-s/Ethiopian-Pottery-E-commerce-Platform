@@ -1,4 +1,0 @@
-// Created: Fri Nov 28 08:30:14 PM EAT 2025
-// Purpose: Fix null reference
-// Update 1764351014
-// Update 1764351016
