@@ -1,0 +1,20 @@
+/* feat: implement shopping cart functionality */
+/* Created: Fri Nov 28 08:51:57 PM EAT 2025 */
+
+.feat_implement_shopp {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.feat_implement_shopp-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+    .feat_implement_shopp {
+        padding: 0.5rem;
+    }
+}
