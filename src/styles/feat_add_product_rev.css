@@ -1,0 +1,20 @@
+/* feat: add product reviews and ratings */
+/* Created: Fri Nov 28 08:51:58 PM EAT 2025 */
+
+.feat_add_product_rev {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.feat_add_product_rev-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+    .feat_add_product_rev {
+        padding: 0.5rem;
+    }
+}
