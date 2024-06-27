@@ -1,2 +1,0 @@
-// Created: Fri Nov 28 09:07:04 PM EAT 2025
-// Purpose: Fix null reference
