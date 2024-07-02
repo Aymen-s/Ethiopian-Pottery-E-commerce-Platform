@@ -1,0 +1,2 @@
+// Created: Fri Nov 28 09:07:07 PM EAT 2025
+// Purpose: Style modal
