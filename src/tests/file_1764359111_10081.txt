@@ -1,6 +1,0 @@
-// Created: Fri Nov 28 10:45:11 PM EAT 2025
-// Component: Add search
-// Author: Aymen-s
-// Update: Fri Nov 28 10:45:12 PM EAT 2025
-// Update: Fri Nov 28 10:45:12 PM EAT 2025
-// Update: Fri Nov 28 10:45:15 PM EAT 2025
