@@ -1,8 +1,0 @@
-// Created: Fri Nov 28 10:45:09 PM EAT 2025
-// Component: Clean up logs
-// Author: Aymen-s
-// Update: Fri Nov 28 10:45:10 PM EAT 2025
-// Update: Fri Nov 28 10:45:11 PM EAT 2025
-// Update: Fri Nov 28 10:45:11 PM EAT 2025
-// Update: Fri Nov 28 10:45:13 PM EAT 2025
-// Update: Fri Nov 28 10:45:14 PM EAT 2025
