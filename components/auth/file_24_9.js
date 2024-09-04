@@ -1,5 +1,5 @@
 /**
- * fix: resolve login token expiration issue
+ * fix: resolve image upload size limit
  * Created: 2024-09-04
  */
 
@@ -13,7 +13,3 @@ function module249() {
 }
 
 module.exports = module249;
-// Update: Commit 3 on 2024-09-11 at 9:26
-// Update: Commit 1 on 2024-10-08 at 16:42
-// Update: Commit 2 on 2024-10-23 at 16:9
-// Update: Commit 3 on 2024-12-17 at 13:2
