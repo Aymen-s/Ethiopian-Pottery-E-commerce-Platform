@@ -1,5 +1,5 @@
 /**
- * docs: add component usage examples
+ * style: improve mobile responsiveness
  * Created: 2024-09-05
  */
 
