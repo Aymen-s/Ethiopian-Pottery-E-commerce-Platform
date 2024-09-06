@@ -1,0 +1,3 @@
+// Created: Fri Nov 28 10:45:19 PM EAT 2025
+// Component: fix: resolve responsive issues
+// Author: Aymen-s
