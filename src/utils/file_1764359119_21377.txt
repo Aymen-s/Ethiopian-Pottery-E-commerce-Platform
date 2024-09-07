@@ -1,5 +1,0 @@
-// Created: Fri Nov 28 10:45:19 PM EAT 2025
-// Component: Style modal
-// Author: Aymen-s
-// Update: Fri Nov 28 10:45:20 PM EAT 2025
-// Update: Fri Nov 28 10:45:20 PM EAT 2025
