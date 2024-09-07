@@ -2,3 +2,4 @@
 // Component: feat: add user authentication
 // Author: Aymen-s
 // Update: Fri Nov 28 10:45:18 PM EAT 2025
+// Update: Fri Nov 28 10:45:20 PM EAT 2025
