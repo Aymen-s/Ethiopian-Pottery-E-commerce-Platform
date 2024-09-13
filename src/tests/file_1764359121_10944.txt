@@ -1,3 +1,0 @@
-// Created: Fri Nov 28 10:45:21 PM EAT 2025
-// Component: Add rate limiting
-// Author: Aymen-s
