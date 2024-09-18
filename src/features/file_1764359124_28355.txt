@@ -1,3 +1,0 @@
-// Created: Fri Nov 28 10:45:24 PM EAT 2025
-// Component: docs: update API documentation
-// Author: Aymen-s
