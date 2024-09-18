@@ -1,5 +1,5 @@
 /**
- * fix: correct price formatting display
+ * refactor: restructure API service layer
  * Created: 2024-09-18
  */
 
