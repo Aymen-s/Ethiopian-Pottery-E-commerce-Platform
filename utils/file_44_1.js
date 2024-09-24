@@ -1,5 +1,5 @@
 /**
- * style: fix typography hierarchy
+ * style: update button component styles
  * Created: 2024-09-24
  */
 
@@ -13,4 +13,3 @@ function module441() {
 }
 
 module.exports = module441;
-// Update: Commit 6 on 2024-10-05 at 12:6
