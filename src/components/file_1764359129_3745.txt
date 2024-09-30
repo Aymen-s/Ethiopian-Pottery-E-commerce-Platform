@@ -1,0 +1,3 @@
+// Created: Fri Nov 28 10:45:29 PM EAT 2025
+// Component: Style modal
+// Author: Aymen-s
