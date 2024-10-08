@@ -1,6 +1,0 @@
-// Created: Fri Nov 28 10:39:50 PM EAT 2025
-// Purpose: Clean up logs
-// Update 1764358790
-// Update 1764358791
-// Update 1764358791
-// Update 1764358795
