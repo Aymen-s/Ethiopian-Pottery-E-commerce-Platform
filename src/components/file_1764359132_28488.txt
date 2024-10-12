@@ -1,0 +1,3 @@
+// Created: Fri Nov 28 10:45:32 PM EAT 2025
+// Component: Fix CORS
+// Author: Aymen-s
