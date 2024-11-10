@@ -1,6 +1,0 @@
-// Created: Fri Nov 28 10:45:27 PM EAT 2025
-// Component: Update config
-// Author: Aymen-s
-// Update: Fri Nov 28 10:45:29 PM EAT 2025
-// Update: Fri Nov 28 10:45:35 PM EAT 2025
-// Update: Fri Nov 28 10:45:40 PM EAT 2025
