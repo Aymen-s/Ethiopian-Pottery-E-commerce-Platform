@@ -1,5 +1,5 @@
 /**
- * feat: implement payment gateway integration
+ * refactor: optimize database queries
  * Created: 2024-11-21
  */
 
