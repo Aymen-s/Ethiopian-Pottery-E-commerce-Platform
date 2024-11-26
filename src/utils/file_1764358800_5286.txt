@@ -1,7 +1,0 @@
-// Created: Fri Nov 28 10:40:00 PM EAT 2025
-// Purpose: Refactor service
-// Update 1764358805
-// Update 1764358805
-// Update 1764358815
-// Update 1764358817
-// Update 1764358821
