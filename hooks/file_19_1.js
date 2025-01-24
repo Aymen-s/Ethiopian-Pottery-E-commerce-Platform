@@ -1,6 +1,6 @@
 /**
- * fix: resolve image upload size limit
- * Created: 2024-08-30
+ * docs: add component usage examples
+ * Created: 2025-01-24
  */
 
 function module191() {
