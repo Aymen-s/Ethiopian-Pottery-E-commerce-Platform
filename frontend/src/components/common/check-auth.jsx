@@ -15,12 +15,13 @@ function CheckAuth({ isAuthenticated, user, children }) {
   }
 
   if (
-    (isAuthenticated && location.pathname.includes("/login")) ||
-    location.pathname.includes("/register")
+    isAuthenticated &&
+    (location.pathname.includes("/login") ||
+      location.pathname.includes("/register"))
   ) {
-    if (user?.role === "admin") {
+    if (user?.role === "admin" && location.pathname !== "/admin/dashboard") {
       return <Navigate to="/admin/dashboard" />;
-    } else {
+    } else if (user?.role !== "admin" && location.pathname !== "/shop/home") {
       return <Navigate to="/shop/home" />;
     }
   }
