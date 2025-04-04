@@ -21,14 +21,10 @@ function AuthRegister() {
     dispatch(registerUser(formData)).then((data) => {
       console.log(data);
       if (data?.payload?.success) {
-        toast.success("Account created successfully", {
-          description: data?.payload?.message,
-        });
+        toast.success("Account created successfully");
         navigate("/auth/login");
       } else {
-        toast.error(
-          data?.payload?.message || "Registration failed. Try again!"
-        );
+        toast.error(data?.payload?.message || "Something went wrong");
       }
     });
 
