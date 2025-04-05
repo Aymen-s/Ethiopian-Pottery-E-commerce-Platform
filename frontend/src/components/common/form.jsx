@@ -52,12 +52,16 @@ function CommonForm({
             value={value}
           >
             <SelectTrigger className="w-full">
-              <SelectValue placeholder={getControlItem.label} />
+              <SelectValue
+                placeholder={getControlItem.placeholder || getControlItem.label}
+              />
             </SelectTrigger>
             <SelectContent>
               {getControlItem.options && getControlItem.options.length > 0
                 ? getControlItem.options.map((optionItem) => (
-                    <SelectItem>{optionItem.label}</SelectItem>
+                    <SelectItem key={optionItem.value} value={optionItem.value}>
+                      {optionItem.label}
+                    </SelectItem>
                   ))
                 : null}
             </SelectContent>

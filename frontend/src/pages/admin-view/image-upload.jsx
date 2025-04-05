@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import axios from "axios";
 import { FileIcon, UploadCloudIcon, XIcon } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
@@ -8,9 +9,10 @@ import React, { useEffect, useRef, useState } from "react";
 function ProductImageUpload({
   imageFile,
   setImageFile,
-  uploadedImageUrl,
+  //   uploadedImageUrl,
   setUploadedImageUrl,
   setImageLoadingState,
+  imageLoadingState,
 }) {
   const inputRef = useRef(null);
   const [uploadError, setUploadError] = useState(null);
@@ -96,6 +98,8 @@ function ProductImageUpload({
               Drag and drop or click to upload
             </span>
           </Label>
+        ) : imageLoadingState ? (
+          <Skeleton className="h-10 bg-gray-100" />
         ) : (
           <div className="flex items-center justify-between">
             <div className="flex items-center">
