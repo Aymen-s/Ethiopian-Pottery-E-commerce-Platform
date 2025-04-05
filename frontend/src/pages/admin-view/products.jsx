@@ -13,7 +13,7 @@ import ProductImageUpload from "./image-upload";
 const initialFormData = {
   image: null,
   title: "",
-  desription: "",
+  description: "",
   category: "",
   price: "",
   brand: "",
@@ -24,31 +24,31 @@ const initialFormData = {
 function AdminProducts() {
   const [openCreateProductsDialog, setOpenCreateProductsDialog] =
     useState(false);
-  const [formData, setFormData] = useState({ initialFormData });
+  const [formData, setFormData] = useState(initialFormData);
   const [imageFile, setImageFile] = useState(null);
   const [uploadedImageUrl, setUploadedImageUrl] = useState("");
+  const [imageLoadingState, setImageLoadingState] = useState(false);
 
-  function onSubmit() {
-    // Handle form submission
-    console.log(formData);
+  function onSubmit(e) {
+    e.preventDefault();
+    const submitData = {
+      ...formData,
+      image: uploadedImageUrl,
+    };
+    console.log("Form submitted with:", submitData);
   }
+
   return (
     <>
       <div className="mb-5 flex justify-end w-full">
-        <Button
-          onClick={() => {
-            setOpenCreateProductsDialog(true);
-          }}
-        >
-          Add New product
+        <Button onClick={() => setOpenCreateProductsDialog(true)}>
+          Add New Product
         </Button>
       </div>
       <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4"></div>
       <Sheet
         open={openCreateProductsDialog}
-        onOpenChange={() => {
-          setOpenCreateProductsDialog(false);
-        }}
+        onOpenChange={() => setOpenCreateProductsDialog(false)}
       >
         <SheetContent side="right" className="overflow-auto">
           <SheetHeader>
@@ -59,6 +59,7 @@ function AdminProducts() {
             setImageFile={setImageFile}
             uploadedImageUrl={uploadedImageUrl}
             setUploadedImageUrl={setUploadedImageUrl}
+            setImageLoadingState={setImageLoadingState}
           />
           <div className="py-6 px-4">
             <CommonForm
@@ -67,7 +68,7 @@ function AdminProducts() {
               formControls={addProductFormElements}
               buttonText="Add"
               onSubmit={onSubmit}
-            ></CommonForm>
+            />
           </div>
         </SheetContent>
       </Sheet>
