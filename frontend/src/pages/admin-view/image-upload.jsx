@@ -13,6 +13,7 @@ function ProductImageUpload({
   setUploadedImageUrl,
   setImageLoadingState,
   imageLoadingState,
+  isEditMode,
 }) {
   const inputRef = useRef(null);
   const [uploadError, setUploadError] = useState(null);
@@ -79,7 +80,9 @@ function ProductImageUpload({
       <div
         onDragOver={handleDragOver}
         onDrop={handleDrop}
-        className="border-2 border-dashed rounded-lg p-4"
+        className={`${
+          isEditMode ? "opacity-60" : ""
+        } border-2 border-dashed rounded-lg p-4`}
       >
         <Input
           id="image-upload"
@@ -87,11 +90,14 @@ function ProductImageUpload({
           className="hidden"
           ref={inputRef}
           onChange={handleImageFileChange}
+          disabled={isEditMode}
         />
         {!imageFile ? (
           <Label
             htmlFor="image-upload"
-            className="flex flex-col items-center justify-center h-32 cursor-pointer"
+            className={`${
+              isEditMode ? "cursor-not-allowed" : "cursor-pointer"
+            }flex flex-col items-center justify-center h-32 `}
           >
             <UploadCloudIcon className="h-10 w-10 text-muted-foreground mb-2" />
             <span className="text-sm text-muted-foreground">

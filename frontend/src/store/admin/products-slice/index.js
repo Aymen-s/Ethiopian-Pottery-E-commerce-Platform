@@ -44,7 +44,7 @@ export const editProduct = createAsyncThunk(
   "/products/editproduct",
   async ({ id, formData }) => {
     const result = await axios.put(
-      `http://localhost:5000/api/admin/products/edit/${id}`,
+      `http://localhost:5000/api/admin/products/update/${id}`,
       formData,
       {
         headers: {
