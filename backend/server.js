@@ -33,4 +33,6 @@ app.use("/api/auth", authRouter);
 app.use("/api/admin/products", adminProductsRouter);
 app.use("/api/shop/products", shopProductsRouter);
 
-app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+app.listen(PORT, "0.0.0.0", () =>
+  console.log(`Server is running on port ${PORT}`)
+);
