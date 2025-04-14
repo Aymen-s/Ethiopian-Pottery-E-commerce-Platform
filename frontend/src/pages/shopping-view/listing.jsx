@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { sortOptions } from "@/config";
+import { addToCart, fetchCartItems } from "@/store/shop/cart-slice";
 import {
   fetchAllFilteredProducts,
   fetchProductDetails,
@@ -18,6 +19,7 @@ import { ArrowUpDownIcon } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
+import { toast } from "sonner";
 
 function createSearchParamsHelper(filterParams) {
   const queryParams = [];
@@ -37,6 +39,7 @@ function ShoppingListing() {
   const { productList, productDetails } = useSelector(
     (state) => state.shopProducts
   );
+  const { user } = useSelector((state) => state.auth);
   const [filters, setFilters] = useState({});
   const [sort, setSort] = useState(null);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -70,6 +73,17 @@ function ShoppingListing() {
 
   function handleGetProductDetails(id) {
     dispatch(fetchProductDetails(id));
+  }
+
+  function handleAddtoCart(productId) {
+    dispatch(addToCart({ userId: user.id, productId, quantity: 1 })).then(
+      (data) => {
+        if (data.payload.success) {
+          dispatch(fetchCartItems(user.id));
+          toast.success("Product added to cart");
+        }
+      }
+    );
   }
 
   useEffect(() => {
@@ -141,6 +155,7 @@ function ShoppingListing() {
               handleGetProductDetails={handleGetProductDetails}
               key={product._id}
               product={product}
+              handleAddtoCart={handleAddtoCart}
             />
           ))}
         </div>
