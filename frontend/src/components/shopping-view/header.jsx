@@ -1,5 +1,5 @@
 import { House, LogOut, Menu, ShoppingCart, User } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Component } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
 import { Button } from "../ui/button";
@@ -17,14 +17,74 @@ import { Avatar, AvatarFallback } from "../ui/avatar";
 import { logoutUser } from "@/store/auth-slice";
 import UserCartWrapper from "./cart-wrapper";
 import { fetchCartItems } from "@/store/shop/cart-slice";
+import { Label } from "../ui/label";
+import { fetchAllFilteredProducts } from "@/store/shop/products-slice";
+
+// Error Boundary Component
+class CartErrorBoundary extends Component {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="p-4 text-red-500">
+          Something went wrong with the cart. Please try again later.
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 function MenuItems() {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  function handleNavigate(getCurrentMenuItem) {
+    const currentFilter =
+      getCurrentMenuItem.id === "home"
+        ? {}
+        : {
+            category: [getCurrentMenuItem.id],
+          };
+
+    // Construct query string from filter
+    const queryParams = new URLSearchParams();
+    if (currentFilter.category) {
+      queryParams.set("category", currentFilter.category[0]);
+    }
+
+    // Dispatch fetchAllFilteredProducts to update product list
+    dispatch(
+      fetchAllFilteredProducts({
+        filterParams: currentFilter,
+        sortParams: "price-lowtohigh",
+      })
+    );
+
+    // Navigate with query params
+    navigate({
+      pathname: getCurrentMenuItem.path,
+      search: queryParams.toString(),
+    });
+  }
+
   return (
     <nav className="flex flex-col mb-3 lg:mb-0 lg:items-center gap-6 lg:flex-row p-4">
       {shoppingViewHeaderMenuItems.map((item) => (
-        <Link key={item.id} to={item.path} className="text-sm font-medium">
+        <Label
+          onClick={() => {
+            handleNavigate(item);
+          }}
+          key={item.id}
+          className="text-sm font-medium cursor-pointer"
+        >
           {item.label}
-        </Link>
+        </Label>
       ))}
     </nav>
   );
@@ -37,13 +97,15 @@ function HeaderRightContent() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  useEffect(() => {
+    if (user?.id) {
+      dispatch(fetchCartItems(user.id));
+    }
+  }, [dispatch, user?.id]);
+
   function handleLogout() {
     dispatch(logoutUser());
   }
-
-  useEffect(() => {
-    dispatch(fetchCartItems(user.id));
-  }, [dispatch]);
 
   return (
     <div className="flex lg:items-center lg:flex-row flex-col gap-4 p-4 lg:p-0">
@@ -56,18 +118,22 @@ function HeaderRightContent() {
           <ShoppingCart className="w-6 h-6" />
           <span className="sr-only">User Cart</span>
         </Button>
-        <UserCartWrapper cartItems={cartItems.items} />
+        <CartErrorBoundary>
+          <UserCartWrapper cartItems={cartItems?.items || []} />
+        </CartErrorBoundary>
       </Sheet>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Avatar className="bg-black">
             <AvatarFallback className="bg-black text-white font-extrabold">
-              {user?.userName?.charAt(0).toUpperCase()}
+              {user?.userName?.charAt(0).toUpperCase() || "U"}
             </AvatarFallback>
           </Avatar>
         </DropdownMenuTrigger>
         <DropdownMenuContent side="right" className="w-56">
-          <DropdownMenuLabel>Logged in as {user?.userName}</DropdownMenuLabel>
+          <DropdownMenuLabel>
+            Logged in as {user?.userName || "Guest"}
+          </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => navigate("/shop/account")}>
             <User className="mr-2 h-4 w-4" />
@@ -106,7 +172,7 @@ function ShoppingHeader() {
         </Sheet>
         <div className="hidden lg:block">
           <MenuItems />
-        </div>
+        </div>{" "}
         <div className="hidden lg:block">
           <HeaderRightContent />
         </div>

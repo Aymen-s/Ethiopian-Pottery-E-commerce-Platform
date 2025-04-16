@@ -41,34 +41,76 @@ function ShoppingListing() {
   );
   const { user } = useSelector((state) => state.auth);
   const [filters, setFilters] = useState({});
-  const [sort, setSort] = useState(null);
+  const [sort, setSort] = useState("price-lowtohigh");
   const [searchParams, setSearchParams] = useSearchParams();
   const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
+
+  // Initialize and sync filters with URL params
+  useEffect(() => {
+    const category = searchParams.get("category");
+    const brand = searchParams.get("brand");
+    const newFilters = {};
+    if (category) {
+      newFilters.category = [category];
+    }
+    if (brand) {
+      newFilters.brand = brand.split(",");
+    }
+    setFilters(newFilters);
+  }, [searchParams]);
+
+  // Update URL params when filters change
+  useEffect(() => {
+    if (Object.keys(filters).length > 0) {
+      const queryString = createSearchParamsHelper(filters);
+      setSearchParams(new URLSearchParams(queryString));
+    } else {
+      setSearchParams(new URLSearchParams());
+    }
+  }, [filters, setSearchParams]);
+
+  // Fetch products when filters or sort change
+  useEffect(() => {
+    dispatch(
+      fetchAllFilteredProducts({ filterParams: filters, sortParams: sort })
+    );
+  }, [dispatch, filters, sort]);
 
   function handleSort(value) {
     setSort(value);
   }
 
-  function handleFilter(getSectionId, getCurrentOption) {
-    let cpyFilters = { ...filters };
-    const indexOfCurrentSection = Object.keys(cpyFilters).indexOf(getSectionId);
-
-    if (indexOfCurrentSection === -1) {
-      cpyFilters = {
-        ...cpyFilters,
-        [getSectionId]: [getCurrentOption],
-      };
-    } else {
-      const indexOfCurrentOption =
-        cpyFilters[getSectionId].indexOf(getCurrentOption);
-      if (indexOfCurrentOption === -1) {
-        cpyFilters[getSectionId].push(getCurrentOption);
-      } else {
-        cpyFilters[getSectionId].splice(indexOfCurrentOption, 1);
+  function handleFilter(getSectionId, getCurrentOption, checked) {
+    setFilters((prevFilters) => {
+      const newFilters = { ...prevFilters };
+      if (!newFilters[getSectionId]) {
+        newFilters[getSectionId] = [];
       }
-    }
-    setFilters(cpyFilters);
-    sessionStorage.setItem("filters", JSON.stringify(cpyFilters));
+      if (getSectionId === "category") {
+        // Single selection for category
+        if (checked) {
+          newFilters[getSectionId] = [getCurrentOption];
+        } else {
+          delete newFilters[getSectionId];
+        }
+      } else {
+        // Multi-selection for brand
+        if (checked) {
+          newFilters[getSectionId] = [
+            ...newFilters[getSectionId].filter((id) => id !== getCurrentOption),
+            getCurrentOption,
+          ];
+        } else {
+          newFilters[getSectionId] = newFilters[getSectionId].filter(
+            (id) => id !== getCurrentOption
+          );
+          if (newFilters[getSectionId].length === 0) {
+            delete newFilters[getSectionId];
+          }
+        }
+      }
+      return newFilters;
+    });
   }
 
   function handleGetProductDetails(id) {
@@ -87,31 +129,10 @@ function ShoppingListing() {
   }
 
   useEffect(() => {
-    setSort("price-lowtohigh");
-    setFilters(JSON.parse(sessionStorage.getItem("filters")) || {});
-  }, []);
-
-  useEffect(() => {
-    if (Object.keys(filters).length > 0) {
-      const createQueryString = createSearchParamsHelper(filters);
-      setSearchParams(new URLSearchParams(createQueryString));
-    }
-  }, [filters]);
-
-  useEffect(() => {
-    if (filters !== null && sort !== null)
-      dispatch(
-        fetchAllFilteredProducts({ filterParams: filters, sortParams: sort })
-      );
-  }, [dispatch, filters, sort]);
-
-  useEffect(() => {
     if (productDetails !== null) {
       setOpenDetailsDialog(true);
     }
   }, [productDetails]);
-
-  console.log("productDetails", productDetails);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6 p-4 md:p-6">

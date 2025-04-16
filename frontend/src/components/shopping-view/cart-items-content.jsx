@@ -2,15 +2,40 @@ import React from "react";
 import { Button } from "../ui/button";
 import { Minus, Plus, Trash } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { deleteCartItem } from "@/store/shop/cart-slice";
+import { deleteCartItem, updateCartQuantity } from "@/store/shop/cart-slice";
+import { toast } from "sonner";
 
 function UserCartItemsContent({ cartItem }) {
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
+
+  function handleUpdateQuantity(getCartItem, typeOfAction) {
+    dispatch(
+      updateCartQuantity({
+        userId: user.id,
+        productId: getCartItem.productId,
+        quantity:
+          typeOfAction === "plus"
+            ? getCartItem.quantity + 1
+            : getCartItem.quantity - 1,
+      })
+    ).then((data) => {
+      if (data.payload.success) {
+        toast.success("Cart item updated successfully");
+      } else {
+        toast.error("Failed to update cart item");
+      }
+    });
+  }
+
   function handleCartItemDelete(getCartItem) {
     dispatch(
       deleteCartItem({ userId: user.id, productId: getCartItem.productId })
-    );
+    ).then((data) => {
+      if (data.payload.success) {
+        toast.success("Cart item deleted successfully");
+      }
+    });
   }
   return (
     <div className="flex items-center space-x-4 p-4">
@@ -26,6 +51,8 @@ function UserCartItemsContent({ cartItem }) {
             variant="outline"
             size="icon"
             className="h-8 w-8 rounded-full"
+            disabled={cartItem.quantity === 1}
+            onClick={() => handleUpdateQuantity(cartItem, "minus")}
           >
             <Minus className="w-4 h-4" />
             <span className="sr-only">Decrease</span>
@@ -35,6 +62,7 @@ function UserCartItemsContent({ cartItem }) {
             variant="outline"
             size="icon"
             className="h-8 w-8 rounded-full"
+            onClick={() => handleUpdateQuantity(cartItem, "plus")}
           >
             <Plus className="w-4 h-4" />
             <span className="sr-only">Increase</span>
