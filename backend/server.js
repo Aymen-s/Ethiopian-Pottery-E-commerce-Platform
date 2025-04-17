@@ -9,7 +9,7 @@ const shopCartRouter = require("./routes/shop/cart-routes");
 
 mongoose
   .connect(
-    "mongodb+srv://aymensileshi:Dd6EjDUOcXX6fv7j@cluster0.x4d2gly.mongodb.net/"
+    "mongodb://aymensileshi:S0uQf6bXX4W4w9uS@ac-wc93l39-shard-00-00.x4d2gly.mongodb.net:27017,ac-wc93l39-shard-00-01.x4d2gly.mongodb.net:27017,ac-wc93l39-shard-00-02.x4d2gly.mongodb.net:27017/?replicaSet=atlas-l7gtrv-shard-0&ssl=true&authSource=admin&retryWrites=true&w=majority&appName=Cluster0"
   )
   .then(() => {
     console.log("Mongodb is connected");

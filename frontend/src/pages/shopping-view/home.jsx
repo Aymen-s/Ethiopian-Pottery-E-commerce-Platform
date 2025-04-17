@@ -14,9 +14,15 @@ import {
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchAllFilteredProducts } from "@/store/shop/products-slice";
+import {
+  fetchAllFilteredProducts,
+  fetchProductDetails,
+} from "@/store/shop/products-slice";
 import ShoppingProductTile from "@/components/shopping-view/product-tile";
 import { useNavigate } from "react-router-dom";
+import { addToCart, fetchCartItems } from "@/store/shop/cart-slice";
+import { toast } from "sonner";
+import ProductDetailsDialog from "@/components/shopping-view/product-detail";
 
 const categoriesWithIcon = [
   { id: "men", label: "Men", icon: ShirtIcon },
@@ -37,7 +43,11 @@ const brandsWithIcon = [
 
 function ShoppingHome() {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const { productList } = useSelector((state) => state.shopProducts);
+  const { productList, productDetails } = useSelector(
+    (state) => state.shopProducts
+  );
+  const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
+  const { user } = useSelector((state) => state.auth);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const slides = [bannerOne, bannerTwo, bannerThree];
   const dispatch = useDispatch();
@@ -71,12 +81,22 @@ function ShoppingHome() {
     });
   }
 
+  function handleGetProductDetails(id) {
+    dispatch(fetchProductDetails(id));
+  }
+
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 5000);
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    if (productDetails !== null) {
+      setOpenDetailsDialog(true);
+    }
+  }, [productDetails]);
 
   const handleSlideChange = (direction) => {
     if (isTransitioning) return;
@@ -90,6 +110,17 @@ function ShoppingHome() {
     );
     setTimeout(() => setIsTransitioning(false), 1000);
   };
+
+  function handleAddtoCart(productId) {
+    dispatch(addToCart({ userId: user.id, productId, quantity: 1 })).then(
+      (data) => {
+        if (data.payload.success) {
+          dispatch(fetchCartItems(user.id));
+          toast.success("Product added to cart");
+        }
+      }
+    );
+  }
 
   useEffect(() => {
     dispatch(
@@ -182,12 +213,24 @@ function ShoppingHome() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {productList.length > 0
               ? productList.map((product) => (
-                  <ShoppingProductTile product={product} key={product._id} />
+                  <ShoppingProductTile
+                    handleGetProductDetails={handleGetProductDetails}
+                    product={product}
+                    key={product._id}
+                    handleAddtoCart={handleAddtoCart}
+                  />
                 ))
               : null}
           </div>
         </div>
       </section>
+      {productDetails && (
+        <ProductDetailsDialog
+          open={openDetailsDialog}
+          setOpen={setOpenDetailsDialog}
+          productDetails={productDetails}
+        />
+      )}
     </div>
   );
 }
