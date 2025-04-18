@@ -119,7 +119,10 @@ function HeaderRightContent() {
           <span className="sr-only">User Cart</span>
         </Button>
         <CartErrorBoundary>
-          <UserCartWrapper cartItems={cartItems?.items || []} />
+          <UserCartWrapper
+            setOpenCartSheet={setOpenCartSheet}
+            cartItems={cartItems?.items || []}
+          />
         </CartErrorBoundary>
       </Sheet>
       <DropdownMenu>

@@ -2,8 +2,10 @@ import React from "react";
 import { SheetContent, SheetHeader, SheetTitle } from "../ui/sheet";
 import { Button } from "../ui/button";
 import UserCartItemsContent from "./cart-items-content";
+import { useNavigate } from "react-router-dom";
 
-function UserCartWrapper({ cartItems = [] }) {
+function UserCartWrapper({ cartItems = [], setOpenCartSheet }) {
+  const navigate = useNavigate();
   const totalCartAmount =
     cartItems.length > 0
       ? cartItems.reduce((acc, item) => {
@@ -32,7 +34,15 @@ function UserCartWrapper({ cartItems = [] }) {
           <span className="font-bold">${totalCartAmount.toFixed(2)}</span>
         </div>
       </div>
-      <Button className="w-[90%] mt-6 mx-auto">Checkout</Button>
+      <Button
+        onClick={() => {
+          navigate("/shop/checkout");
+          setOpenCartSheet(false);
+        }}
+        className="w-[90%] mt-6 mx-auto"
+      >
+        Checkout
+      </Button>
     </SheetContent>
   );
 }
