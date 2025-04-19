@@ -1,7 +1,4 @@
 import React, { useEffect, useState } from "react";
-import bannerOne from "../../assets/banner-1.webp";
-import bannerTwo from "../../assets/banner-2.webp";
-import bannerThree from "../../assets/banner-3.webp";
 import { Button } from "@/components/ui/button";
 import {
   BabyIcon,
@@ -23,6 +20,7 @@ import { useNavigate } from "react-router-dom";
 import { addToCart, fetchCartItems } from "@/store/shop/cart-slice";
 import { toast } from "sonner";
 import ProductDetailsDialog from "@/components/shopping-view/product-detail";
+import { getFeatureImages } from "@/store/common-slice";
 
 const categoriesWithIcon = [
   { id: "men", label: "Men", icon: ShirtIcon },
@@ -46,10 +44,10 @@ function ShoppingHome() {
   const { productList, productDetails } = useSelector(
     (state) => state.shopProducts
   );
+  const { featureImageList } = useSelector((state) => state.commonFeature);
   const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
   const { user } = useSelector((state) => state.auth);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const slides = [bannerOne, bannerTwo, bannerThree];
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -87,10 +85,10 @@ function ShoppingHome() {
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
+      setCurrentSlide((prev) => (prev + 1) % featureImageList.length);
     }, 5000);
     return () => clearInterval(timer);
-  }, []);
+  }, [featureImageList]);
 
   useEffect(() => {
     if (productDetails !== null) {
@@ -103,9 +101,9 @@ function ShoppingHome() {
     setIsTransitioning(true);
     setCurrentSlide((prev) =>
       direction === "next"
-        ? (prev + 1) % slides.length
+        ? (prev + 1) % featureImageList.length
         : prev === 0
-        ? slides.length - 1
+        ? featureImageList.length - 1
         : prev - 1
     );
     setTimeout(() => setIsTransitioning(false), 1000);
@@ -131,19 +129,25 @@ function ShoppingHome() {
     );
   }, [dispatch]);
 
+  useEffect(() => {
+    dispatch(getFeatureImages());
+  }, [dispatch]);
+
   return (
     <div className="flex flex-col min-h-screen">
       <div className="relative w-full h-[600px] overflow-hidden">
-        {slides.map((slide, index) => (
-          <img
-            key={index}
-            src={slide}
-            alt={`Slide ${index}`}
-            className={`absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-1000 ease-in-out ${
-              index === currentSlide ? "opacity-100" : "opacity-0"
-            }`}
-          />
-        ))}
+        {featureImageList && featureImageList.length > 0
+          ? featureImageList.map((slide, index) => (
+              <img
+                key={index}
+                src={slide.image}
+                alt={`Slide ${index}`}
+                className={`absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-1000 ease-in-out ${
+                  index === currentSlide ? "opacity-100" : "opacity-0"
+                }`}
+              />
+            ))
+          : null}
         <Button
           variant="outline"
           size="icon"
