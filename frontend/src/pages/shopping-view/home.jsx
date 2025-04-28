@@ -1,14 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  BabyIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  CloudLightning,
-  ShirtIcon,
-  UmbrellaIcon,
-  WatchIcon,
-} from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -21,22 +12,29 @@ import { addToCart, fetchCartItems } from "@/store/shop/cart-slice";
 import { toast } from "sonner";
 import ProductDetailsDialog from "@/components/shopping-view/product-detail";
 import { getFeatureImages } from "@/store/common-slice";
+import {
+  BrushIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  CoffeeIcon,
+  EthernetPort,
+  GlassWaterIcon,
+  IceCreamBowlIcon,
+  SoupIcon,
+  UsersIcon,
+} from "lucide-react";
 
 const categoriesWithIcon = [
-  { id: "men", label: "Men", icon: ShirtIcon },
-  { id: "women", label: "Women", icon: CloudLightning },
-  { id: "kids", label: "Kids", icon: BabyIcon },
-  { id: "accessories", label: "Accessories", icon: WatchIcon },
-  { id: "footwear", label: "Footwear", icon: UmbrellaIcon },
+  { id: "jebenas", label: "Jebenas", icon: CoffeeIcon },
+  { id: "dists", label: "Dists", icon: SoupIcon },
+  { id: "bowls", label: "Bowls", icon: IceCreamBowlIcon },
+  { id: "vases", label: "Vases", icon: GlassWaterIcon },
+  { id: "other", label: "Other", icon: EthernetPort },
 ];
 
-const brandsWithIcon = [
-  { id: "nike", label: "Nike", icon: ShirtIcon },
-  { id: "adidas", label: "Adidas", icon: ShirtIcon },
-  { id: "puma", label: "Puma", icon: ShirtIcon },
-  { id: "levi", label: "Levi's", icon: ShirtIcon },
-  { id: "zara", label: "Zara", icon: ShirtIcon },
-  { id: "h&m", label: "H&M", icon: ShirtIcon },
+const cooperativesWithIcon = [
+  { id: "kechene", label: "Kechene", icon: UsersIcon },
+  { id: "other", label: "Other Artisans", icon: BrushIcon },
 ];
 
 function ShoppingHome() {
@@ -56,15 +54,13 @@ function ShoppingHome() {
       [section]: [getCurrentItem.id],
     };
 
-    // Construct query string
     const queryParams = new URLSearchParams();
     if (section === "category") {
       queryParams.set("category", getCurrentItem.id);
-    } else if (section === "brand") {
-      queryParams.set("brand", getCurrentItem.id);
+    } else if (section === "cooperative") {
+      queryParams.set("cooperative", getCurrentItem.id);
     }
 
-    // Dispatch filter to update product list
     dispatch(
       fetchAllFilteredProducts({
         filterParams: currentFilter,
@@ -72,7 +68,6 @@ function ShoppingHome() {
       })
     );
 
-    // Navigate with query params
     navigate({
       pathname: "/shop/listing",
       search: queryParams.toString(),
@@ -192,17 +187,21 @@ function ShoppingHome() {
       </section>
       <section className="py-12 bg-gray-50">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-8">Shop by Brand</h2>
+          <h2 className="text-3xl font-bold text-center mb-8">
+            Shop by Cooperative
+          </h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {brandsWithIcon.map((brandItem) => (
+            {cooperativesWithIcon.map((coopItem) => (
               <Card
-                onClick={() => handleNavigateToListingPage(brandItem, "brand")}
-                key={brandItem.id}
+                onClick={() =>
+                  handleNavigateToListingPage(coopItem, "cooperative")
+                }
+                key={coopItem.id}
                 className="cursor-pointer hover:shadow-lg transition-shadow"
               >
                 <CardContent className="flex flex-col items-center justify-center p-6">
-                  <brandItem.icon className="w-12 h-12 text-primary mb-4" />
-                  <span className="font-bold">{brandItem.label}</span>
+                  <coopItem.icon className="w-12 h-12 text-primary mb-4" />
+                  <span className="font-bold">{coopItem.label}</span>
                 </CardContent>
               </Card>
             ))}
@@ -212,11 +211,13 @@ function ShoppingHome() {
       <section className="py-12">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-8">
-            Featured Products
+            Featured Pottery
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {productList.length > 0
-              ? productList.map((product) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
+            {productList.length > 0 ? (
+              productList
+                .slice(0, 3)
+                .map((product) => (
                   <ShoppingProductTile
                     handleGetProductDetails={handleGetProductDetails}
                     product={product}
@@ -224,7 +225,11 @@ function ShoppingHome() {
                     handleAddtoCart={handleAddtoCart}
                   />
                 ))
-              : null}
+            ) : (
+              <p className="text-center col-span-full">
+                No featured products available.
+              </p>
+            )}
           </div>
         </div>
       </section>

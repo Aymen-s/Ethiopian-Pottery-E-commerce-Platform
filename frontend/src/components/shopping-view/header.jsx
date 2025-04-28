@@ -30,23 +30,32 @@ function MenuItems() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   function handleNavigate(getCurrentMenuItem) {
-    sessionStorage.removeItem("filters");
-    const currentFilter =
-      getCurrentMenuItem.id !== "home" &&
-      getCurrentMenuItem.id !== "products" &&
-      getCurrentMenuItem.id !== "search"
-        ? {
-            category: [getCurrentMenuItem.id],
-          }
-        : null;
+    // Determine if the menu item should reset filters (e.g., "home", "products", "search")
+    const shouldResetFilters =
+      getCurrentMenuItem.id === "home" ||
+      getCurrentMenuItem.id === "products" ||
+      getCurrentMenuItem.id === "search";
 
+    // Set or clear filters based on the menu item
+    const currentFilter = shouldResetFilters
+      ? {} // Reset filters for "home", "products", "search"
+      : {
+          category: [getCurrentMenuItem.id], // Apply category filter for other items (e.g., "dists")
+        };
+
+    // Update sessionStorage with the new filters
     sessionStorage.setItem("filters", JSON.stringify(currentFilter));
 
-    location.pathname.includes("listing") && currentFilter !== null
-      ? setSearchParams(
-          new URLSearchParams(`?category=${getCurrentMenuItem.id}`)
-        )
-      : navigate(getCurrentMenuItem.path);
+    // Update URL query params if on the listing page and filters are applied
+    if (location.pathname.includes("listing") && !shouldResetFilters) {
+      setSearchParams(
+        new URLSearchParams(`?category=${getCurrentMenuItem.id}`)
+      );
+    } else {
+      // Clear query params when resetting filters
+      setSearchParams(new URLSearchParams());
+      navigate(getCurrentMenuItem.path);
+    }
   }
 
   return (
@@ -78,8 +87,6 @@ function HeaderRightContent() {
   useEffect(() => {
     dispatch(fetchCartItems(user?.id));
   }, [dispatch]);
-
-  console.log(cartItems, "sangam");
 
   return (
     <div className="flex lg:items-center lg:flex-row flex-col gap-4">

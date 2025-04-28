@@ -1,7 +1,8 @@
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 import ProductDetailsDialog from "@/components/shopping-view/product-detail";
 import ShoppingProductTile from "@/components/shopping-view/product-tile";
-import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
 import { addToCart, fetchCartItems } from "@/store/shop/cart-slice";
 import { fetchProductDetails } from "@/store/shop/products-slice";
 import {
@@ -17,12 +18,11 @@ function SearchProducts() {
   const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const dispatch = useDispatch();
-  const { searchResults } = useSelector((state) => state.shopSearch);
+  const { searchResults, isLoading } = useSelector((state) => state.shopSearch);
   const { productDetails } = useSelector((state) => state.shopProducts);
-
   const { user } = useSelector((state) => state.auth);
-
   const { cartItems } = useSelector((state) => state.shopCart);
+
   useEffect(() => {
     if (keyword && keyword.trim() !== "" && keyword.trim().length > 3) {
       setTimeout(() => {
@@ -33,10 +33,9 @@ function SearchProducts() {
       setSearchParams(new URLSearchParams(`?keyword=${keyword}`));
       dispatch(resetSearchResults());
     }
-  }, [keyword]);
+  }, [keyword, dispatch, setSearchParams]);
 
   function handleAddtoCart(getCurrentProductId, getTotalStock) {
-    console.log(cartItems);
     let getCartItems = cartItems.items || [];
 
     if (getCartItems.length) {
@@ -49,7 +48,6 @@ function SearchProducts() {
           toast.error(
             `Only ${getQuantity} quantity can be added for this item`
           );
-
           return;
         }
       }
@@ -70,15 +68,12 @@ function SearchProducts() {
   }
 
   function handleGetProductDetails(getCurrentProductId) {
-    console.log(getCurrentProductId);
     dispatch(fetchProductDetails(getCurrentProductId));
   }
 
   useEffect(() => {
     if (productDetails !== null) setOpenDetailsDialog(true);
   }, [productDetails]);
-
-  console.log(searchResults, "searchResults");
 
   return (
     <div className="container mx-auto md:px-6 px-4 py-8">
@@ -93,18 +88,28 @@ function SearchProducts() {
           />
         </div>
       </div>
-      {!searchResults.length ? (
-        <h1 className="text-5xl font-extrabold">No result found!</h1>
-      ) : null}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-        {searchResults.map((item) => (
-          <ShoppingProductTile
-            handleAddtoCart={handleAddtoCart}
-            product={item}
-            handleGetProductDetails={handleGetProductDetails}
-          />
-        ))}
-      </div>
+      {isLoading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+          {[...Array(4)].map((_, index) => (
+            <Skeleton key={index} className="h-96 w-full rounded-lg" />
+          ))}
+        </div>
+      ) : searchResults.length === 0 && keyword.trim().length > 3 ? (
+        <h1 className="text-5xl font-extrabold text-center">
+          No results found!
+        </h1>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+          {searchResults.map((item) => (
+            <ShoppingProductTile
+              key={item._id}
+              handleAddtoCart={handleAddtoCart}
+              product={item}
+              handleGetProductDetails={handleGetProductDetails}
+            />
+          ))}
+        </div>
+      )}
       <ProductDetailsDialog
         open={openDetailsDialog}
         setOpen={setOpenDetailsDialog}

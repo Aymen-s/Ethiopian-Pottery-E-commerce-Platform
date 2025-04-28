@@ -20,6 +20,7 @@ import { ArrowUpDownIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function createSearchParamsHelper(filterParams) {
   const queryParams = [];
@@ -27,19 +28,16 @@ function createSearchParamsHelper(filterParams) {
   for (const [key, value] of Object.entries(filterParams)) {
     if (Array.isArray(value) && value.length > 0) {
       const paramValue = value.join(",");
-
       queryParams.push(`${key}=${encodeURIComponent(paramValue)}`);
     }
   }
-
-  console.log(queryParams, "queryParams");
 
   return queryParams.join("&");
 }
 
 function ShoppingListing() {
   const dispatch = useDispatch();
-  const { productList, productDetails } = useSelector(
+  const { productList, productDetails, isLoading } = useSelector(
     (state) => state.shopProducts
   );
   const { cartItems } = useSelector((state) => state.shopCart);
@@ -49,7 +47,35 @@ function ShoppingListing() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
 
-  const categorySearchParam = searchParams.get("category");
+  useEffect(() => {
+    const category = searchParams.get("category");
+    const cooperative = searchParams.get("cooperative");
+
+    const initialFilters = {};
+    if (category) {
+      initialFilters.category = category.split(",").filter(Boolean);
+    }
+    if (cooperative) {
+      initialFilters.cooperative = cooperative.split(",").filter(Boolean);
+    }
+
+    // Merge with sessionStorage filters (if any)
+    const storedFilters = JSON.parse(sessionStorage.getItem("filters"));
+
+    // If no URL params and storedFilters is empty or null, reset filters to {}
+    const mergedFilters =
+      !category &&
+      !cooperative &&
+      (!storedFilters || Object.keys(storedFilters).length === 0)
+        ? {}
+        : {
+            ...storedFilters,
+            ...initialFilters,
+          };
+
+    setFilters(mergedFilters);
+    sessionStorage.setItem("filters", JSON.stringify(mergedFilters));
+  }, [searchParams]);
 
   function handleSort(value) {
     setSort(value);
@@ -78,12 +104,10 @@ function ShoppingListing() {
   }
 
   function handleGetProductDetails(getCurrentProductId) {
-    console.log(getCurrentProductId);
     dispatch(fetchProductDetails(getCurrentProductId));
   }
 
   function handleAddtoCart(getCurrentProductId, getTotalStock) {
-    console.log(cartItems);
     let getCartItems = cartItems.items || [];
 
     if (getCartItems.length) {
@@ -96,7 +120,6 @@ function ShoppingListing() {
           toast.error(
             `Only ${getQuantity} quantity can be added for this item`
           );
-
           return;
         }
       }
@@ -118,38 +141,38 @@ function ShoppingListing() {
 
   useEffect(() => {
     setSort("price-lowtohigh");
-    setFilters(JSON.parse(sessionStorage.getItem("filters")) || {});
-  }, [categorySearchParam]);
+  }, []);
 
   useEffect(() => {
     if (filters && Object.keys(filters).length > 0) {
       const createQueryString = createSearchParamsHelper(filters);
       setSearchParams(new URLSearchParams(createQueryString));
+    } else {
+      setSearchParams(new URLSearchParams()); // Clear query params if filters are empty
     }
-  }, [filters]);
+  }, [filters, setSearchParams]);
 
   useEffect(() => {
-    if (filters !== null && sort !== null)
+    if (filters !== null && sort !== null) {
       dispatch(
         fetchAllFilteredProducts({ filterParams: filters, sortParams: sort })
       );
+    }
   }, [dispatch, sort, filters]);
 
   useEffect(() => {
     if (productDetails !== null) setOpenDetailsDialog(true);
   }, [productDetails]);
 
-  console.log(productList, "productListproductListproductList");
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6 p-4 md:p-6">
       <ProductFilter filters={filters} handleFilter={handleFilter} />
       <div className="bg-background w-full rounded-lg shadow-sm">
         <div className="p-4 border-b flex items-center justify-between">
-          <h2 className="text-lg font-extrabold">All Products</h2>
+          <h2 className="text-lg font-extrabold">All Pottery</h2>
           <div className="flex items-center gap-3">
             <span className="text-muted-foreground">
-              {productList?.length} Products
+              {productList?.length} Items
             </span>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -177,17 +200,28 @@ function ShoppingListing() {
             </DropdownMenu>
           </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
-          {productList && productList.length > 0
-            ? productList.map((productItem) => (
+        {isLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
+            {[...Array(4)].map((_, index) => (
+              <Skeleton key={index} className="h-96 w-full rounded-lg" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
+            {productList && productList.length > 0 ? (
+              productList.map((productItem) => (
                 <ShoppingProductTile
                   handleGetProductDetails={handleGetProductDetails}
                   product={productItem}
                   handleAddtoCart={handleAddtoCart}
+                  key={productItem._id}
                 />
               ))
-            : null}
-        </div>
+            ) : (
+              <p className="text-center col-span-full">No products found.</p>
+            )}
+          </div>
+        )}
       </div>
       <ProductDetailsDialog
         open={openDetailsDialog}

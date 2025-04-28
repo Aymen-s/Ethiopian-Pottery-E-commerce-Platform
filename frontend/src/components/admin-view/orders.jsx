@@ -18,13 +18,19 @@ import {
   resetOrderDetails,
 } from "@/store/admin/order-slice";
 import { Badge } from "../ui/badge";
+import { Skeleton } from "../ui/skeleton";
+import { Loader2 } from "lucide-react";
 
 function AdminOrdersView() {
   const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
-  const { orderList, orderDetails } = useSelector((state) => state.adminOrder);
+  const [loadingDetailsId, setLoadingDetailsId] = useState(null); // Track which order is loading details
+  const { orderList, orderDetails, isLoading } = useSelector(
+    (state) => state.adminOrder
+  );
   const dispatch = useDispatch();
 
   function handleFetchOrderDetails(getId) {
+    setLoadingDetailsId(getId); // Set the loading ID for the clicked order
     dispatch(getOrderDetailsForAdmin(getId));
   }
 
@@ -32,10 +38,11 @@ function AdminOrdersView() {
     dispatch(getAllOrdersForAdmin());
   }, [dispatch]);
 
-  console.log(orderDetails, "orderList");
-
   useEffect(() => {
-    if (orderDetails !== null) setOpenDetailsDialog(true);
+    if (orderDetails !== null) {
+      setOpenDetailsDialog(true);
+      setLoadingDetailsId(null); // Reset loading ID once details are fetched
+    }
   }, [orderDetails]);
 
   return (
@@ -44,21 +51,57 @@ function AdminOrdersView() {
         <CardTitle>All Orders</CardTitle>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Order ID</TableHead>
-              <TableHead>Order Date</TableHead>
-              <TableHead>Order Status</TableHead>
-              <TableHead>Order Price</TableHead>
-              <TableHead>
-                <span className="sr-only">Details</span>
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {orderList && orderList.length > 0
-              ? orderList.map((orderItem) => (
+        {isLoading ? (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Order ID</TableHead>
+                <TableHead>Order Date</TableHead>
+                <TableHead>Order Status</TableHead>
+                <TableHead>Order Price</TableHead>
+                <TableHead>
+                  <span className="sr-only">Details</span>
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {[...Array(3)].map((_, index) => (
+                <TableRow key={index}>
+                  <TableCell>
+                    <Skeleton className="h-6 w-32" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-6 w-24" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-6 w-20" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-6 w-16" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-10 w-24" />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Order ID</TableHead>
+                <TableHead>Order Date</TableHead>
+                <TableHead>Order Status</TableHead>
+                <TableHead>Order Price</TableHead>
+                <TableHead>
+                  <span className="sr-only">Details</span>
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {orderList && orderList.length > 0 ? (
+                orderList.map((orderItem) => (
                   <TableRow key={orderItem._id}>
                     <TableCell>{orderItem?._id}</TableCell>
                     <TableCell>{orderItem?.orderDate.split("T")[0]}</TableCell>
@@ -94,7 +137,13 @@ function AdminOrdersView() {
                           onClick={() =>
                             handleFetchOrderDetails(orderItem?._id)
                           }
+                          disabled={
+                            isLoading && loadingDetailsId === orderItem?._id
+                          }
                         >
+                          {isLoading && loadingDetailsId === orderItem?._id ? (
+                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                          ) : null}
                           View Details
                         </Button>
                         <AdminOrderDetailsView orderDetails={orderDetails} />
@@ -102,9 +151,16 @@ function AdminOrdersView() {
                     </TableCell>
                   </TableRow>
                 ))
-              : null}
-          </TableBody>
-        </Table>
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center">
+                    No orders found.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        )}
       </CardContent>
     </Card>
   );

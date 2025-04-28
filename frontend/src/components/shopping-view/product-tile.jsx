@@ -1,16 +1,27 @@
 import { Card, CardContent, CardFooter } from "../ui/card";
 import { Button } from "../ui/button";
-import { brandOptionsMap, categoryOptionsMap } from "@/config";
+import { cooperativeOptionsMap, categoryOptionsMap } from "@/config";
 import { Badge } from "../ui/badge";
+import { Loader2 } from "lucide-react";
+import { useSelector } from "react-redux";
+import { useState } from "react";
 
 function ShoppingProductTile({
   product,
   handleGetProductDetails,
   handleAddtoCart,
 }) {
+  const { isLoading } = useSelector((state) => state.shopProducts);
+  const [isDetailsLoading, setIsDetailsLoading] = useState(false);
+
+  const handleClick = (id) => {
+    setIsDetailsLoading(true);
+    handleGetProductDetails(id);
+  };
+
   return (
-    <Card className="w-full max-w-sm mx-auto">
-      <div onClick={() => handleGetProductDetails(product?._id)}>
+    <Card className="w-full max-w-sm mx-auto relative">
+      <div onClick={() => handleClick(product?._id)}>
         <div className="relative">
           <img
             src={product?.image}
@@ -38,7 +49,7 @@ function ShoppingProductTile({
               {categoryOptionsMap[product?.category]}
             </span>
             <span className="text-[16px] text-muted-foreground">
-              {brandOptionsMap[product?.brand]}
+              {cooperativeOptionsMap[product?.cooperative]}
             </span>
           </div>
           <div className="flex justify-between items-center mb-2">
@@ -71,6 +82,11 @@ function ShoppingProductTile({
           </Button>
         )}
       </CardFooter>
+      {isLoading && isDetailsLoading && (
+        <div className="absolute inset-0 bg-black/30 flex items-center justify-center rounded-lg">
+          <Loader2 className="w-8 h-8 animate-spin text-white" />
+        </div>
+      )}
     </Card>
   );
 }

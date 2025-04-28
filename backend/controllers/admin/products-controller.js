@@ -25,7 +25,7 @@ const addProduct = async (req, res) => {
       title,
       description,
       category,
-      brand,
+      cooperative,
       price,
       salePrice,
       totalStock,
@@ -35,7 +35,7 @@ const addProduct = async (req, res) => {
       title,
       description,
       category,
-      brand,
+      cooperative,
       price,
       salePrice,
       totalStock,
@@ -74,7 +74,7 @@ const editProduct = async (req, res) => {
       title,
       description,
       category,
-      brand,
+      cooperative,
       price,
       salePrice,
       totalStock,
@@ -90,7 +90,7 @@ const editProduct = async (req, res) => {
     product.title = title || product.title;
     product.description = description || product.description;
     product.category = category || product.category;
-    product.brand = brand || product.brand;
+    product.cooperative = cooperative || product.cooperative;
     product.price = price === "" ? 0 : price || product.price;
     product.salePrice = salePrice === "" ? 0 : salePrice || product.salePrice;
     product.totalStock = totalStock || product.totalStock;

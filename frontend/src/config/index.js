@@ -45,37 +45,34 @@ export const addProductFormElements = [
     name: "title",
     componentType: "input",
     type: "text",
-    placeholder: "Enter product title",
+    placeholder: "Enter pottery title (e.g., Jebena)",
   },
   {
     label: "Description",
     name: "description",
     componentType: "textarea",
-    placeholder: "Enter product description",
+    placeholder:
+      "Enter pottery description (e.g., Handcrafted for coffee ceremonies)",
   },
   {
     label: "Category",
     name: "category",
     componentType: "select",
     options: [
-      { id: "men", value: "men", label: "Men" },
-      { id: "women", value: "women", label: "Women" },
-      { id: "kids", value: "kids", label: "Kids" },
-      { id: "accessories", value: "accessories", label: "Accessories" },
-      { id: "footwear", value: "footwear", label: "Footwear" },
+      { id: "jebenas", value: "jebenas", label: "Jebenas" },
+      { id: "dists", value: "dists", label: "Dists" },
+      { id: "bowls", value: "bowls", label: "Bowls" },
+      { id: "vases", value: "vases", label: "Vases" },
+      { id: "other", value: "other", label: "Other" }, // Add here
     ],
   },
   {
-    label: "Brand",
-    name: "brand",
+    label: "Cooperative",
+    name: "cooperative",
     componentType: "select",
     options: [
-      { id: "nike", value: "nike", label: "Nike" },
-      { id: "adidas", value: "adidas", label: "Adidas" },
-      { id: "puma", value: "puma", label: "Puma" },
-      { id: "levi", value: "levi", label: "Levi's" },
-      { id: "zara", value: "zara", label: "Zara" },
-      { id: "h&m", value: "h&m", label: "H&M" },
+      { id: "kechene", value: "kechene", label: "Kechene" },
+      { id: "other", value: "other", label: "Other Artisans" },
     ],
   },
   {
@@ -83,14 +80,14 @@ export const addProductFormElements = [
     name: "price",
     componentType: "input",
     type: "number",
-    placeholder: "Enter product price",
+    placeholder: "Enter pottery price (ETB)",
   },
   {
     label: "Sale Price",
     name: "salePrice",
     componentType: "input",
     type: "number",
-    placeholder: "Enter sale price (optional)",
+    placeholder: "Enter sale price (optional, ETB)",
   },
   {
     label: "Total Stock",
@@ -104,29 +101,25 @@ export const addProductFormElements = [
 export const shoppingViewHeaderMenuItems = [
   { id: "home", label: "Home", path: "/shop/home" },
   { id: "products", label: "products", path: "/shop/listing" },
-  { id: "men", label: "Men", path: "/shop/listing" },
-  { id: "women", label: "Women", path: "/shop/listing" },
-  { id: "kids", label: "Kids", path: "/shop/listing" },
-  { id: "accessories", label: "Accessories", path: "/shop/listing" },
-  { id: "footwear", label: "Footwear", path: "/shop/listing" },
+  { id: "jebenas", label: "Jebenas", path: "/shop/listing" },
+  { id: "dists", label: "Dists", path: "/shop/listing" },
+  { id: "bowls", label: "Bowls", path: "/shop/listing" },
+  { id: "vases", label: "Vases", path: "/shop/listing" },
+  { id: "other", label: "Other", path: "/shop/listing" },
   { id: "search", label: "Search", path: "/shop/search" },
 ];
 
 export const filterOptions = {
   category: [
-    { id: "men", label: "Men" },
-    { id: "women", label: "Women" },
-    { id: "kids", label: "Kids" },
-    { id: "accessories", label: "Accessories" },
-    { id: "footwear", label: "Footwear" },
+    { id: "jebenas", label: "Jebenas" },
+    { id: "dists", label: "Dists" },
+    { id: "bowls", label: "Bowls" },
+    { id: "vases", label: "Vases" },
+    { id: "other", label: "Other" },
   ],
-  brand: [
-    { id: "nike", label: "Nike" },
-    { id: "adidas", label: "Adidas" },
-    { id: "puma", label: "Puma" },
-    { id: "levi", label: "Levi's" },
-    { id: "zara", label: "Zara" },
-    { id: "h&m", label: "H&M" },
+  cooperative: [
+    { id: "kechene", label: "Kechene" },
+    { id: "other", label: "Other Artisans" },
   ],
 };
 
@@ -138,20 +131,16 @@ export const sortOptions = [
 ];
 
 export const categoryOptionsMap = {
-  men: "Men",
-  women: "Women",
-  kids: "Kids",
-  accessories: "Accessories",
-  footwear: "Footwear",
+  jebenas: "Jebenas",
+  dists: "Dists",
+  bowls: "Bowls",
+  vases: "Vases",
+  other: "Other",
 };
 
-export const brandOptionsMap = {
-  nike: "Nike",
-  adidas: "Adidas",
-  puma: "Puma",
-  levi: "Levi",
-  zara: "Zara",
-  "h&m": "H&M",
+export const cooperativeOptionsMap = {
+  kechene: "Kechene",
+  other: "Other Artisans",
 };
 
 export const addressFormControls = [
@@ -160,21 +149,21 @@ export const addressFormControls = [
     name: "address",
     componentType: "input",
     type: "text",
-    placeholder: "Enter your address",
+    placeholder: "Enter your address (e.g., Bole, Addis Ababa)",
   },
   {
     label: "City",
     name: "city",
     componentType: "input",
     type: "text",
-    placeholder: "Enter your city",
+    placeholder: "Enter your city (e.g., Addis Ababa)",
   },
   {
     label: "Pincode",
     name: "pincode",
     componentType: "input",
     type: "text",
-    placeholder: "Enter your pincode",
+    placeholder: "Enter your pincode (if applicable)",
   },
   {
     label: "Phone",
@@ -184,9 +173,9 @@ export const addressFormControls = [
     placeholder: "Enter your phone number",
   },
   {
-    label: "Notes",
+    label: "Delivery Notes",
     name: "notes",
     componentType: "textarea",
-    placeholder: "Enter any additional notes",
+    placeholder: "Enter delivery notes (e.g., Motorbike or EMS preferred)",
   },
 ];

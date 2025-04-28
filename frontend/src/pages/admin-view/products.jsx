@@ -25,7 +25,7 @@ const initialFormData = {
   description: "",
   category: "",
   price: "",
-  brand: "",
+  cooperative: "",
   salePrice: "",
   totalStock: "",
 };
