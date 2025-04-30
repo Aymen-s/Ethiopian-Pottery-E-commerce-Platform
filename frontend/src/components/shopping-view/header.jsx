@@ -82,6 +82,7 @@ function HeaderRightContent() {
 
   function handleLogout() {
     dispatch(logoutUser());
+    navigate("/");
   }
 
   useEffect(() => {

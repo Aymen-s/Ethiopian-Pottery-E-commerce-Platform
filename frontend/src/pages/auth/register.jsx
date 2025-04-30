@@ -11,6 +11,7 @@ const initialState = {
   email: "",
   password: "",
 };
+
 function AuthRegister() {
   const [formData, setFormData] = useState(initialState);
   const dispatch = useDispatch();
@@ -27,26 +28,18 @@ function AuthRegister() {
         toast.error(data?.payload?.message || "Something went wrong");
       }
     });
-
     setFormData(initialState);
   }
 
   return (
-    <div className="mx-auto w-full max-w-md space-y-6">
+    <div className="space-y-6">
       <div className="text-center">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          Create new account
-        </h1>
-        <p className="mt-2">
-          Already have an account
-          <Link
-            className="font-medium ml-2 text-primary hover:underline text-blue-500"
-            to="/auth/login"
-          >
-            Login
-          </Link>
+        <h1 className="text-2xl font-bold text-gray-900">Create new account</h1>
+        <p className="mt-2 text-sm text-gray-600">
+          Join our community of pottery enthusiasts
         </p>
       </div>
+
       <CommonForm
         formControls={registerFormControls}
         buttonText={"Sign Up"}
@@ -54,6 +47,22 @@ function AuthRegister() {
         setFormData={setFormData}
         onSubmit={onSubmit}
       />
+
+      <div className="text-center text-sm text-gray-500">
+        Already have an account?{" "}
+        <Link
+          to="/auth/login"
+          className="font-medium text-amber-600 hover:text-amber-500 hover:underline"
+        >
+          Sign in
+        </Link>
+      </div>
+
+      <div className="mt-6">
+        <p className="text-xs text-gray-500 text-center">
+          By creating an account, you agree to our Terms and Privacy Policy
+        </p>
+      </div>
     </div>
   );
 }

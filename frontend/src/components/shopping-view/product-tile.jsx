@@ -20,70 +20,77 @@ function ShoppingProductTile({
   };
 
   return (
-    <Card className="w-full max-w-sm mx-auto relative">
-      <div onClick={() => handleClick(product?._id)}>
-        <div className="relative">
+    <Card className="w-full max-w-sm mx-auto overflow-hidden group hover:shadow-lg transition-shadow duration-300">
+      <div onClick={() => handleClick(product?._id)} className="cursor-pointer">
+        <div className="relative overflow-hidden">
           <img
             src={product?.image}
             alt={product?.title}
-            className="w-full h-[300px] object-cover rounded-t-lg"
+            className="w-full h-80 object-cover transition-transform duration-500 group-hover:scale-105"
           />
           {product?.totalStock === 0 ? (
             <Badge className="absolute top-2 left-2 bg-red-500 hover:bg-red-600">
               Out Of Stock
             </Badge>
           ) : product?.totalStock < 10 ? (
-            <Badge className="absolute top-2 left-2 bg-red-500 hover:bg-red-600">
-              {`Only ${product?.totalStock} items left`}
+            <Badge className="absolute top-2 left-2 bg-amber-600 hover:bg-amber-700">
+              {`Only ${product?.totalStock} left`}
             </Badge>
           ) : product?.salePrice > 0 ? (
-            <Badge className="absolute top-2 left-2 bg-red-500 hover:bg-red-600">
-              Sale
+            <Badge className="absolute top-2 left-2 bg-green-600 hover:bg-green-700">
+              On Sale
             </Badge>
           ) : null}
         </div>
-        <CardContent className="p-4">
-          <h2 className="text-xl font-bold mb-2">{product?.title}</h2>
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-[16px] text-muted-foreground">
+        <CardContent className="p-6">
+          <h2 className="text-xl font-bold mb-2 line-clamp-1">
+            {product?.title}
+          </h2>
+          <div className="flex justify-between items-center mb-3">
+            <span className="text-sm text-gray-600">
               {categoryOptionsMap[product?.category]}
             </span>
-            <span className="text-[16px] text-muted-foreground">
+            <span className="text-sm text-gray-600">
               {cooperativeOptionsMap[product?.cooperative]}
             </span>
           </div>
-          <div className="flex justify-between items-center mb-2">
+          <div className="flex items-center gap-3">
             <span
-              className={`${
-                product?.salePrice > 0 ? "line-through" : ""
-              } text-lg font-semibold text-primary`}
+              className={`text-lg font-bold ${
+                product?.salePrice > 0
+                  ? "line-through text-gray-400"
+                  : "text-amber-700"
+              }`}
             >
               ${product?.price}
             </span>
-            {product?.salePrice > 0 ? (
-              <span className="text-lg font-semibold text-primary">
+            {product?.salePrice > 0 && (
+              <span className="text-lg font-bold text-amber-700">
                 ${product?.salePrice}
               </span>
-            ) : null}
+            )}
           </div>
         </CardContent>
       </div>
-      <CardFooter>
+      <CardFooter className="p-6 pt-0">
         {product?.totalStock === 0 ? (
-          <Button className="w-full opacity-60 cursor-not-allowed">
+          <Button className="w-full" disabled>
             Out Of Stock
           </Button>
         ) : (
           <Button
-            onClick={() => handleAddtoCart(product?._id, product?.totalStock)}
-            className="w-full"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleAddtoCart(product?._id, product?.totalStock);
+            }}
+            className="w-full bg-amber-600 hover:bg-amber-700"
           >
             Add to cart
           </Button>
         )}
       </CardFooter>
       {isLoading && isDetailsLoading && (
-        <div className="absolute inset-0 bg-black/30 flex items-center justify-center rounded-lg">
+        <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
           <Loader2 className="w-8 h-8 animate-spin text-white" />
         </div>
       )}

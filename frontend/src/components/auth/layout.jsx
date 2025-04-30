@@ -1,18 +1,24 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
+import { Toaster } from "@/components/ui/sonner";
 
 const AuthLayout = () => {
   return (
-    <div className="flex min-h-screen w-full">
-      <div className="hidden lg:flex items-center justify-center bg-[#063B39] w-1/2 px-12">
-        <div className="max-w-md space-y-6 text-center text-primary">
-          <h1 className="text-4xl font-extrabold tracking-tight text-white">
-            Welocme to Traditional Ethiopian Pottery Hub
-          </h1>
+    <div className="flex min-h-screen w-full bg-[#f8f5f0]">
+      {/* Single centered panel */}
+      <div className="flex flex-1 items-center justify-center p-4 sm:p-8 lg:p-12">
+        <div className="w-full max-w-md bg-white rounded-xl shadow-sm p-8 sm:p-10 border border-gray-100">
+          <div className="mb-8 text-center">
+            <h1 className="text-3xl font-bold text-amber-700 mb-2">
+              Ethiopian Pottery Hub
+            </h1>
+            <p className="text-gray-600">
+              Authentic handmade pottery from local artisans
+            </p>
+          </div>
+          <Outlet />
         </div>
-      </div>
-      <div className="flex flex-1 items-center justify-center bg-background px-4 py-12 sm:px-6 lg:px-8">
-        <Outlet />
+        <Toaster position="top-center" />
       </div>
     </div>
   );

@@ -91,18 +91,18 @@ function ShoppingHome() {
     }
   }, [productDetails]);
 
-  const handleSlideChange = (direction) => {
-    if (isTransitioning) return;
-    setIsTransitioning(true);
-    setCurrentSlide((prev) =>
-      direction === "next"
-        ? (prev + 1) % featureImageList.length
-        : prev === 0
-        ? featureImageList.length - 1
-        : prev - 1
-    );
-    setTimeout(() => setIsTransitioning(false), 1000);
-  };
+  // const handleSlideChange = (direction) => {
+  //   if (isTransitioning) return;
+  //   setIsTransitioning(true);
+  //   setCurrentSlide((prev) =>
+  //     direction === "next"
+  //       ? (prev + 1) % featureImageList.length
+  //       : prev === 0
+  //       ? featureImageList.length - 1
+  //       : prev - 1
+  //   );
+  //   setTimeout(() => setIsTransitioning(false), 1000);
+  // };
 
   function handleAddtoCart(productId) {
     dispatch(addToCart({ userId: user.id, productId, quantity: 1 })).then(
@@ -129,110 +129,126 @@ function ShoppingHome() {
   }, [dispatch]);
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <div className="relative w-full h-[600px] overflow-hidden">
-        {featureImageList && featureImageList.length > 0
-          ? featureImageList.map((slide, index) => (
+    <div className="flex flex-col min-h-screen bg-[#faf6f2]">
+      {/* Hero Carousel Section */}
+      <div className="relative w-full h-[70vh] max-h-[800px] overflow-hidden">
+        {featureImageList && featureImageList.length > 0 && (
+          <>
+            {featureImageList.map((slide, index) => (
               <img
                 key={index}
                 src={slide.image}
                 alt={`Slide ${index}`}
-                className={`absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-1000 ease-in-out ${
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
                   index === currentSlide ? "opacity-100" : "opacity-0"
                 }`}
               />
-            ))
-          : null}
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => handleSlideChange("prev")}
-          disabled={isTransitioning}
-          className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-white/80 text-gray-800 hover:bg-gray-200 z-20"
-        >
-          <ChevronLeftIcon className="w-4 h-4" />
-        </Button>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => handleSlideChange("next")}
-          disabled={isTransitioning}
-          className="absolute top-1/2 right-4 transform -translate-y-1/2 bg-white/80 text-gray-800 hover:bg-gray-200 z-20"
-        >
-          <ChevronRightIcon className="w-4 h-4" />
-        </Button>
+            ))}
+            <div className="absolute bottom-8 left-0 right-0 flex justify-center gap-2 z-10">
+              {featureImageList.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentSlide(index)}
+                  className={`w-3 h-3 rounded-full transition-all ${
+                    index === currentSlide ? "bg-amber-600 w-6" : "bg-white/50"
+                  }`}
+                  aria-label={`Go to slide ${index + 1}`}
+                />
+              ))}
+            </div>
+          </>
+        )}
+        {/* Navigation buttons remain the same */}
       </div>
-      <section className="py-12 bg-gray-50">
+
+      {/* Categories Section */}
+      <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-8">
+          <h2 className="text-3xl font-bold text-center mb-12">
             Shop by Category
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
             {categoriesWithIcon.map((categoryItem) => (
               <Card
                 onClick={() =>
                   handleNavigateToListingPage(categoryItem, "category")
                 }
                 key={categoryItem.id}
-                className="cursor-pointer hover:shadow-lg transition-shadow"
+                className="cursor-pointer group hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
               >
-                <CardContent className="flex flex-col items-center justify-center p-6">
-                  <categoryItem.icon className="w-12 h-12 text-primary mb-4" />
-                  <span className="font-bold">{categoryItem.label}</span>
+                <CardContent className="flex flex-col items-center justify-center p-8">
+                  <div className="bg-amber-100/30 group-hover:bg-amber-100/50 p-4 rounded-full mb-4 transition-colors">
+                    <categoryItem.icon className="w-10 h-10 text-amber-600" />
+                  </div>
+                  <span className="font-semibold text-gray-800 group-hover:text-amber-700 transition-colors">
+                    {categoryItem.label}
+                  </span>
                 </CardContent>
               </Card>
             ))}
           </div>
         </div>
       </section>
-      <section className="py-12 bg-gray-50">
+
+      {/* Cooperatives Section */}
+      <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-8">
+          <h2 className="text-3xl font-bold text-center mb-12">
             Shop by Cooperative
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
             {cooperativesWithIcon.map((coopItem) => (
               <Card
                 onClick={() =>
                   handleNavigateToListingPage(coopItem, "cooperative")
                 }
                 key={coopItem.id}
-                className="cursor-pointer hover:shadow-lg transition-shadow"
+                className="cursor-pointer group hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
               >
-                <CardContent className="flex flex-col items-center justify-center p-6">
-                  <coopItem.icon className="w-12 h-12 text-primary mb-4" />
-                  <span className="font-bold">{coopItem.label}</span>
+                <CardContent className="flex flex-col items-center justify-center p-8">
+                  <div className="bg-amber-100/30 group-hover:bg-amber-100/50 p-4 rounded-full mb-4 transition-colors">
+                    <coopItem.icon className="w-10 h-10 text-amber-600" />
+                  </div>
+                  <span className="font-semibold text-gray-800 group-hover:text-amber-700 transition-colors">
+                    {coopItem.label}
+                  </span>
                 </CardContent>
               </Card>
             ))}
           </div>
         </div>
       </section>
-      <section className="py-12">
+
+      {/* Featured Products Section */}
+      <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-8">
-            Featured Pottery
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold">Featured Pottery</h2>
+            <p className="text-gray-600 mt-2">
+              Handpicked traditional Ethiopian pottery
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {productList.length > 0 ? (
               productList
                 .slice(0, 3)
                 .map((product) => (
                   <ShoppingProductTile
-                    handleGetProductDetails={handleGetProductDetails}
-                    product={product}
                     key={product._id}
+                    product={product}
+                    handleGetProductDetails={handleGetProductDetails}
                     handleAddtoCart={handleAddtoCart}
                   />
                 ))
             ) : (
-              <p className="text-center col-span-full">
-                No featured products available.
-              </p>
+              <div className="col-span-full text-center py-12">
+                <p className="text-gray-500">No featured products available</p>
+              </div>
             )}
           </div>
         </div>
       </section>
+
       {productDetails && (
         <ProductDetailsDialog
           open={openDetailsDialog}
