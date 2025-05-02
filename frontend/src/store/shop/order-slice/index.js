@@ -12,47 +12,105 @@ const initialState = {
 
 export const createNewOrder = createAsyncThunk(
   "/order/createNewOrder",
-  async (orderData) => {
-    const response = await axios.post(
-      `${import.meta.env.VITE_API_URL}/api/shop/order/create`,
-      orderData
-    );
-    return response.data;
+  async (orderData, { rejectWithValue }) => {
+    try {
+      const token = JSON.parse(sessionStorage.getItem("token"));
+      if (!token) {
+        return rejectWithValue({ message: "No token provided" });
+      }
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/shop/order/create`,
+        orderData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data || { message: "Failed to create order" }
+      );
+    }
   }
 );
 
 export const capturePayment = createAsyncThunk(
   "/order/capturePayment",
-  async ({ paymentId, payerId, orderId }) => {
-    const response = await axios.post(
-      `${import.meta.env.VITE_API_URL}/api/shop/order/capture`,
-      {
-        paymentId,
-        payerId,
-        orderId,
+  async ({ paymentId, payerId, orderId }, { rejectWithValue }) => {
+    try {
+      const token = JSON.parse(sessionStorage.getItem("token"));
+      if (!token) {
+        return rejectWithValue({ message: "No token provided" });
       }
-    );
-    return response.data;
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/shop/order/capture`,
+        { paymentId, payerId, orderId },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data || { message: "Failed to capture payment" }
+      );
+    }
   }
 );
 
 export const getAllOrdersByUserId = createAsyncThunk(
   "/order/getAllOrdersByUserId",
-  async (userId) => {
-    const response = await axios.get(
-      `${import.meta.env.VITE_API_URL}/api/shop/order/list/${userId}`
-    );
-    return response.data;
+  async (userId, { rejectWithValue }) => {
+    try {
+      const token = JSON.parse(sessionStorage.getItem("token"));
+      if (!token) {
+        return rejectWithValue({ message: "No token provided" });
+      }
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/shop/order/list/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data || { message: "Failed to fetch orders" }
+      );
+    }
   }
 );
 
 export const getOrderDetails = createAsyncThunk(
   "/order/getOrderDetails",
-  async (id) => {
-    const response = await axios.get(
-      `${import.meta.env.VITE_API_URL}/api/shop/order/details/${id}`
-    );
-    return response.data;
+  async (id, { rejectWithValue }) => {
+    try {
+      const token = JSON.parse(sessionStorage.getItem("token"));
+      if (!token) {
+        return rejectWithValue({ message: "No token provided" });
+      }
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/shop/order/details/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data || { message: "Failed to fetch order details" }
+      );
+    }
   }
 );
 
@@ -60,15 +118,23 @@ export const fetchDeliveryOrders = createAsyncThunk(
   "/order/fetchDeliveryOrders",
   async (_, { rejectWithValue }) => {
     try {
+      const token = JSON.parse(sessionStorage.getItem("token"));
+      if (!token) {
+        return rejectWithValue({ message: "No token provided" });
+      }
       const response = await axios.get(
         `${import.meta.env.VITE_API_URL}/api/delivery/orders`,
         {
-          withCredentials: true,
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
       return response.data;
     } catch (err) {
-      return rejectWithValue(err.response.data);
+      return rejectWithValue(
+        err.response?.data || { message: "Failed to fetch delivery orders" }
+      );
     }
   }
 );
@@ -77,16 +143,25 @@ export const confirmDelivery = createAsyncThunk(
   "/order/confirmDelivery",
   async ({ id, confirmed, disputeReason }, { rejectWithValue }) => {
     try {
+      const token = JSON.parse(sessionStorage.getItem("token"));
+      if (!token) {
+        return rejectWithValue({ message: "No token provided" });
+      }
       const response = await axios.patch(
         `${import.meta.env.VITE_API_URL}/api/shop/order/confirm-delivery/${id}`,
         { confirmed, disputeReason },
         {
-          withCredentials: true,
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         }
       );
       return response.data;
     } catch (err) {
-      return rejectWithValue(err.response.data);
+      return rejectWithValue(
+        err.response?.data || { message: "Failed to confirm delivery" }
+      );
     }
   }
 );

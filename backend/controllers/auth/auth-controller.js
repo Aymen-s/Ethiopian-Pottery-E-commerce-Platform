@@ -65,22 +65,34 @@ const loginUser = async (req, res) => {
         expiresIn: "1d",
       }
     );
-    res
-      .cookie("token", token, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "strict",
-      })
-      .json({
-        success: true,
-        message: "Login Successful",
-        user: {
-          id: checkUser._id,
-          role: checkUser.role,
-          email: checkUser.email,
-          userName: checkUser.userName,
-        },
-      });
+    // res
+    //   .cookie("token", token, {
+    //     httpOnly: true,
+    //     secure: true,
+    //     sameSite: "strict",
+    //   })
+    //   .json({
+    //     success: true,
+    //     message: "Login Successful",
+    //     user: {
+    //       id: checkUser._id,
+    //       role: checkUser.role,
+    //       email: checkUser.email,
+    //       userName: checkUser.userName,
+    //     },
+    //   });
+
+    res.status(200).json({
+      success: true,
+      message: "Login Successful",
+      user: {
+        id: checkUser._id,
+        role: checkUser.role,
+        email: checkUser.email,
+        userName: checkUser.userName,
+      },
+      token,
+    });
   } catch (e) {
     console.log(e);
     res.status(500).json({
@@ -106,8 +118,46 @@ const logoutUser = async (req, res) => {
   }
 };
 
+// const authMiddleware = async (req, res, next) => {
+//   const token = req.cookies.token;
+//   if (!token) {
+//     console.log("No token provided in cookies");
+//     return res.status(401).json({
+//       success: false,
+//       message: "Unauthorized: No token provided",
+//     });
+//   }
+
+//   try {
+//     const decoded = jwt.verify(
+//       token,
+//       process.env.JWT_SECRET_KEY || "secret key for jwt"
+//     );
+//     const user = await User.findById(decoded.id);
+
+//     if (!user) {
+//       console.log("User not found for token:", decoded.id);
+//       return res.status(401).json({
+//         success: false,
+//         message: "Unauthorized: User not found",
+//       });
+//     }
+
+//     req.user = user;
+//     next();
+//   } catch (e) {
+//     console.log("Authentication error:", e.message);
+//     return res.status(401).json({
+//       success: false,
+//       message: "Unauthorized: Invalid token",
+//       error: e.message,
+//     });
+//   }
+// };
+
 const authMiddleware = async (req, res, next) => {
-  const token = req.cookies.token;
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
   if (!token) {
     console.log("No token provided in cookies");
     return res.status(401).json({

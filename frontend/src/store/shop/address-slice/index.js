@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 
 const initialState = {
@@ -8,47 +8,109 @@ const initialState = {
 
 export const addNewAddress = createAsyncThunk(
   "addresses/addNewAddress",
-  async (formData) => {
-    const response = await axios.post(
-      `${import.meta.env.VITE_API_URL}/api/shop/address/add`,
-      formData
-    );
-    return response.data;
+  async (formData, { rejectWithValue }) => {
+    try {
+      const token = JSON.parse(sessionStorage.getItem("token"));
+      if (!token) {
+        return rejectWithValue({ message: "No token provided" });
+      }
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/shop/address/add`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data || { message: "Failed to add address" }
+      );
+    }
   }
 );
 
 export const fetchAllAddresses = createAsyncThunk(
   "addresses/fetchAllAddresses",
-  async (userId) => {
-    const response = await axios.get(
-      `${import.meta.env.VITE_API_URL}/api/shop/address/get/${userId}`
-    );
-    return response.data;
+  async (userId, { rejectWithValue }) => {
+    try {
+      const token = JSON.parse(sessionStorage.getItem("token"));
+      if (!token) {
+        return rejectWithValue({ message: "No token provided" });
+      }
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/shop/address/get/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data || { message: "Failed to fetch addresses" }
+      );
+    }
   }
 );
 
 export const editaAddress = createAsyncThunk(
   "addresses/editaAddress",
-  async ({ userId, addressId, formData }) => {
-    const response = await axios.put(
-      `${
-        import.meta.env.VITE_API_URL
-      }/api/shop/address/update/${userId}/${addressId}`,
-      formData
-    );
-    return response.data;
+  async ({ userId, addressId, formData }, { rejectWithValue }) => {
+    try {
+      const token = JSON.parse(sessionStorage.getItem("token"));
+      if (!token) {
+        return rejectWithValue({ message: "No token provided" });
+      }
+      const response = await axios.put(
+        `${
+          import.meta.env.VITE_API_URL
+        }/api/shop/address/update/${userId}/${addressId}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data || { message: "Failed to update address" }
+      );
+    }
   }
 );
 
 export const deleteAddress = createAsyncThunk(
   "addresses/deleteAddress",
-  async ({ userId, addressId }) => {
-    const response = await axios.delete(
-      `${
-        import.meta.env.VITE_API_URL
-      }/api/shop/address/delete/${userId}/${addressId}`
-    );
-    return response.data;
+  async ({ userId, addressId }, { rejectWithValue }) => {
+    try {
+      const token = JSON.parse(sessionStorage.getItem("token"));
+      if (!token) {
+        return rejectWithValue({ message: "No token provided" });
+      }
+      const response = await axios.delete(
+        `${
+          import.meta.env.VITE_API_URL
+        }/api/shop/address/delete/${userId}/${addressId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data || { message: "Failed to delete address" }
+      );
+    }
   }
 );
 

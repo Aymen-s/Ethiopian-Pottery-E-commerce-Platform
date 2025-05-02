@@ -11,17 +11,25 @@ export const addToCart = createAsyncThunk(
   "cart/addToCart",
   async ({ productId, quantity }, { rejectWithValue }) => {
     try {
+      const token = JSON.parse(sessionStorage.getItem("token"));
+      if (!token) {
+        return rejectWithValue({ message: "No token provided" });
+      }
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/shop/cart/add`,
+        { productId, quantity },
         {
-          productId,
-          quantity,
-        },
-        { withCredentials: true }
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
       );
       return response.data;
     } catch (err) {
-      return rejectWithValue(err.response.data);
+      return rejectWithValue(
+        err.response?.data || { message: "Failed to add to cart" }
+      );
     }
   }
 );
@@ -30,13 +38,23 @@ export const fetchCartItems = createAsyncThunk(
   "cart/fetchCartItems",
   async (_, { rejectWithValue }) => {
     try {
+      const token = JSON.parse(sessionStorage.getItem("token"));
+      if (!token) {
+        return rejectWithValue({ message: "No token provided" });
+      }
       const response = await axios.get(
         `${import.meta.env.VITE_API_URL}/api/shop/cart/get`,
-        { withCredentials: true }
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       return response.data;
     } catch (err) {
-      return rejectWithValue(err.response.data);
+      return rejectWithValue(
+        err.response?.data || { message: "Failed to fetch cart items" }
+      );
     }
   }
 );
@@ -45,13 +63,23 @@ export const deleteCartItem = createAsyncThunk(
   "cart/deleteCartItem",
   async ({ productId }, { rejectWithValue }) => {
     try {
+      const token = JSON.parse(sessionStorage.getItem("token"));
+      if (!token) {
+        return rejectWithValue({ message: "No token provided" });
+      }
       const response = await axios.delete(
         `${import.meta.env.VITE_API_URL}/api/shop/cart/${productId}`,
-        { withCredentials: true }
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       return response.data;
     } catch (err) {
-      return rejectWithValue(err.response.data);
+      return rejectWithValue(
+        err.response?.data || { message: "Failed to delete cart item" }
+      );
     }
   }
 );
@@ -60,17 +88,25 @@ export const updateCartQuantity = createAsyncThunk(
   "cart/updateCartQuantity",
   async ({ productId, quantity }, { rejectWithValue }) => {
     try {
+      const token = JSON.parse(sessionStorage.getItem("token"));
+      if (!token) {
+        return rejectWithValue({ message: "No token provided" });
+      }
       const response = await axios.put(
         `${import.meta.env.VITE_API_URL}/api/shop/cart/update-cart`,
+        { productId, quantity },
         {
-          productId,
-          quantity,
-        },
-        { withCredentials: true }
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
       );
       return response.data;
     } catch (err) {
-      return rejectWithValue(err.response.data);
+      return rejectWithValue(
+        err.response?.data || { message: "Failed to update cart quantity" }
+      );
     }
   }
 );
@@ -78,7 +114,7 @@ export const updateCartQuantity = createAsyncThunk(
 const shoppingCartSlice = createSlice({
   name: "shoppingCart",
   initialState,
-  reducer: {},
+  reducers: {}, // Fixed typo: 'reducer' to 'reducers'
   extraReducers: (builder) => {
     builder
       .addCase(addToCart.pending, (state) => {

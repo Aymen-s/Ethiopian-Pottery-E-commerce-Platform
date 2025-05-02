@@ -5,39 +5,83 @@ const initialState = {
   orderList: [],
   orderDetails: null,
   isLoading: false,
-  deliveryGuys: [], // New state for delivery guys
+  deliveryGuys: [],
 };
 
 export const getAllOrdersForAdmin = createAsyncThunk(
   "/order/getAllOrdersForAdmin",
-  async () => {
-    const response = await axios.get(
-      `${import.meta.env.VITE_API_URL}/api/admin/orders/get`
-    );
-    return response.data;
+  async (_, { rejectWithValue }) => {
+    try {
+      const token = JSON.parse(sessionStorage.getItem("token"));
+      if (!token) {
+        return rejectWithValue({ message: "No token provided" });
+      }
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/admin/orders/get`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data || { message: "Failed to fetch orders" }
+      );
+    }
   }
 );
 
 export const getOrderDetailsForAdmin = createAsyncThunk(
   "/order/getOrderDetailsForAdmin",
-  async (id) => {
-    const response = await axios.get(
-      `${import.meta.env.VITE_API_URL}/api/admin/orders/details/${id}`
-    );
-    return response.data;
+  async (id, { rejectWithValue }) => {
+    try {
+      const token = JSON.parse(sessionStorage.getItem("token"));
+      if (!token) {
+        return rejectWithValue({ message: "No token provided" });
+      }
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/admin/orders/details/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data || { message: "Failed to fetch order details" }
+      );
+    }
   }
 );
 
 export const updateOrderStatus = createAsyncThunk(
   "/order/updateOrderStatus",
-  async ({ id, orderStatus }) => {
-    const response = await axios.put(
-      `${import.meta.env.VITE_API_URL}/api/admin/orders/update/${id}`,
-      {
-        orderStatus,
+  async ({ id, orderStatus }, { rejectWithValue }) => {
+    try {
+      const token = JSON.parse(sessionStorage.getItem("token"));
+      if (!token) {
+        return rejectWithValue({ message: "No token provided" });
       }
-    );
-    return response.data;
+      const response = await axios.put(
+        `${import.meta.env.VITE_API_URL}/api/admin/orders/update/${id}`,
+        { orderStatus },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data || { message: "Failed to update order status" }
+      );
+    }
   }
 );
 
@@ -45,15 +89,23 @@ export const fetchDeliveryGuys = createAsyncThunk(
   "/admin/fetchDeliveryGuys",
   async (_, { rejectWithValue }) => {
     try {
+      const token = JSON.parse(sessionStorage.getItem("token"));
+      if (!token) {
+        return rejectWithValue({ message: "No token provided" });
+      }
       const response = await axios.get(
         `${import.meta.env.VITE_API_URL}/api/admin/users/delivery-guys`,
         {
-          withCredentials: true,
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
       return response.data;
     } catch (err) {
-      return rejectWithValue(err.response.data);
+      return rejectWithValue(
+        err.response?.data || { message: "Failed to fetch delivery guys" }
+      );
     }
   }
 );
@@ -62,19 +114,25 @@ export const assignDeliveryGuyAndUpdateStatus = createAsyncThunk(
   "/admin/assignDeliveryGuyAndUpdateStatus",
   async ({ id, assignedDeliveryGuy, orderStatus }, { rejectWithValue }) => {
     try {
+      const token = JSON.parse(sessionStorage.getItem("token"));
+      if (!token) {
+        return rejectWithValue({ message: "No token provided" });
+      }
       const response = await axios.put(
         `${import.meta.env.VITE_API_URL}/api/admin/orders/update/${id}`,
+        { assignedDeliveryGuy, orderStatus },
         {
-          assignedDeliveryGuy,
-          orderStatus,
-        },
-        {
-          withCredentials: true,
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         }
       );
       return response.data;
     } catch (err) {
-      return rejectWithValue(err.response.data);
+      return rejectWithValue(
+        err.response?.data || { message: "Failed to assign delivery guy" }
+      );
     }
   }
 );
@@ -84,7 +142,6 @@ const adminOrderSlice = createSlice({
   initialState,
   reducers: {
     resetOrderDetails: (state) => {
-      console.log("resetOrderDetails");
       state.orderDetails = null;
     },
   },
