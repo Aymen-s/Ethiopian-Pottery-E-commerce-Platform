@@ -42,7 +42,6 @@ function ShoppingListing() {
     (state) => state.shopProducts
   );
   const { cartItems } = useSelector((state) => state.shopCart);
-  const { user } = useSelector((state) => state.auth);
   const [filters, setFilters] = useState({});
   const [sort, setSort] = useState(null);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -107,16 +106,6 @@ function ShoppingListing() {
   }
 
   function handleAddtoCart(getCurrentProductId) {
-    // if (!user || !user._id) {
-    //   toast.error("Please log in to add items to your cart", {
-    //     description: "Redirecting to login page...",
-    //   });
-    //   setTimeout(() => {
-    //     navigate("/auth/login");
-    //   }, 1500);
-    //   return;
-    // }
-
     const product = productList.find(
       (item) => item._id === getCurrentProductId
     );
