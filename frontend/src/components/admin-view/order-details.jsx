@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import CommonForm from "../common/form";
 import { DialogContent } from "../ui/dialog";
 import { Label } from "../ui/label";
@@ -8,46 +8,49 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   getAllOrdersForAdmin,
   getOrderDetailsForAdmin,
-  updateOrderStatus,
+  assignDeliveryGuyAndUpdateStatus,
+  fetchDeliveryGuys,
 } from "@/store/admin/order-slice";
 import { toast } from "sonner";
 
 const initialFormData = {
   status: "",
+  assignedDeliveryGuy: "",
 };
 
-// Define options as a constant to ensure immutability
 const statusOptions = [
   { id: "pending", label: "Pending" },
-  { id: "inProcess", label: "In Process" },
   { id: "inShipping", label: "In Shipping" },
+  { id: "outForDelivery", label: "Out for Delivery" },
   { id: "delivered", label: "Delivered" },
-  { id: "rejected", label: "Rejected" },
+  { id: "disputed", label: "Disputed" },
 ];
 
 function AdminOrderDetailsView({ orderDetails }) {
   const [formData, setFormData] = useState(initialFormData);
-  const { user, isLoading } = useSelector((state) => ({
+  const { user, isLoading, deliveryGuys } = useSelector((state) => ({
     user: state.auth.user,
     isLoading: state.adminOrder.isLoading,
+    deliveryGuys: state.adminOrder.deliveryGuys,
   }));
   const dispatch = useDispatch();
 
-  // Initialize formData.status with the current order status
   useEffect(() => {
-    if (orderDetails?.orderStatus) {
-      setFormData({ status: orderDetails.orderStatus });
-      console.log("Initialized formData:", {
-        status: orderDetails.orderStatus,
+    dispatch(fetchDeliveryGuys());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (orderDetails) {
+      setFormData({
+        status: orderDetails.orderStatus || "",
+        assignedDeliveryGuy: orderDetails.assignedDeliveryGuy?._id || "",
       });
     }
   }, [orderDetails]);
 
   function handleUpdateStatus(event) {
     event.preventDefault();
-    const { status } = formData;
-
-    console.log("Form Data on Submit:", formData);
+    const { status, assignedDeliveryGuy } = formData;
 
     if (!status) {
       toast.error("Please select an order status");
@@ -55,24 +58,30 @@ function AdminOrderDetailsView({ orderDetails }) {
     }
 
     dispatch(
-      updateOrderStatus({ id: orderDetails?._id, orderStatus: status })
+      assignDeliveryGuyAndUpdateStatus({
+        id: orderDetails?._id,
+        assignedDeliveryGuy,
+        orderStatus: status,
+      })
     ).then((data) => {
       if (data?.payload?.success) {
-        dispatch(getOrderDetailsForAdmin(orderDetails?._id));
-        dispatch(getAllOrdersForAdmin());
-        setFormData(initialFormData);
-        toast.success("Order Status Updated", {
+        toast.success("Order Updated", {
           description: data?.payload?.message,
         });
       } else {
-        toast.error("Order Status Update Failed", {
+        toast.error("Order Update Failed", {
           description:
             data?.payload?.message ||
-            "An error occurred while updating the order status",
+            "An error occurred while updating the order",
         });
       }
     });
   }
+
+  const deliveryGuyOptions = deliveryGuys.map((dg) => ({
+    id: dg._id,
+    label: dg.userName,
+  }));
 
   return (
     <DialogContent className="sm:max-w-[600px]">
@@ -91,7 +100,7 @@ function AdminOrderDetailsView({ orderDetails }) {
             <Label>${orderDetails?.totalAmount}</Label>
           </div>
           <div className="flex mt-2 items-center justify-between">
-            <p className="font-medium">Payment method</p>
+            <p className="font-medium">Payment Method</p>
             <Label>{orderDetails?.paymentMethod}</Label>
           </div>
           <div className="flex mt-2 items-center justify-between">
@@ -105,14 +114,14 @@ function AdminOrderDetailsView({ orderDetails }) {
                 className={`py-1 px-3 ${
                   orderDetails?.orderStatus === "delivered"
                     ? "bg-green-500"
-                    : orderDetails?.orderStatus === "rejected"
+                    : orderDetails?.orderStatus === "disputed"
                     ? "bg-red-600"
                     : orderDetails?.orderStatus === "inShipping"
                     ? "bg-blue-500"
-                    : orderDetails?.orderStatus === "inProcess"
-                    ? "bg-yellow-500"
                     : orderDetails?.orderStatus === "pending"
                     ? "bg-gray-500"
+                    : orderDetails?.orderStatus === "outForDelivery"
+                    ? "bg-purple-500"
                     : "bg-black"
                 }`}
               >
@@ -120,6 +129,20 @@ function AdminOrderDetailsView({ orderDetails }) {
               </Badge>
             </Label>
           </div>
+          <div className="flex mt-2 items-center justify-between">
+            <p className="font-medium">Assigned Delivery Guy</p>
+            <Label>
+              {orderDetails?.assignedDeliveryGuy
+                ? orderDetails.assignedDeliveryGuy.userName
+                : "Not Assigned"}
+            </Label>
+          </div>
+          {orderDetails?.orderStatus === "disputed" && (
+            <div className="flex mt-2 items-center justify-between">
+              <p className="font-medium">Dispute Reason</p>
+              <Label>{orderDetails?.disputeReason || "Not specified"}</Label>
+            </div>
+          )}
         </div>
         <Separator />
         <div className="grid gap-4">
@@ -128,7 +151,10 @@ function AdminOrderDetailsView({ orderDetails }) {
             <ul className="grid gap-3">
               {orderDetails?.cartItems && orderDetails?.cartItems.length > 0
                 ? orderDetails?.cartItems.map((item) => (
-                    <li className="flex items-center justify-between">
+                    <li
+                      key={item.productId}
+                      className="flex items-center justify-between"
+                    >
                       <span>Title: {item.title}</span>
                       <span>Quantity: {item.quantity}</span>
                       <span>Price: ${item.price}</span>
@@ -161,10 +187,16 @@ function AdminOrderDetailsView({ orderDetails }) {
                 componentType: "select",
                 options: statusOptions,
               },
+              {
+                label: "Assign Delivery Guy",
+                name: "assignedDeliveryGuy",
+                componentType: "select",
+                options: deliveryGuyOptions,
+              },
             ]}
             formData={formData}
             setFormData={setFormData}
-            buttonText={"Update Order Status"}
+            buttonText={"Update Order"}
             onSubmit={handleUpdateStatus}
             isBtnDisabled={isLoading}
           />

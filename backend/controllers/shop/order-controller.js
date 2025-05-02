@@ -52,7 +52,6 @@ const createOrder = async (req, res) => {
     paypal.payment.create(create_payment_json, async (error, paymentInfo) => {
       if (error) {
         console.log(error);
-
         return res.status(500).json({
           success: false,
           message: "Error while creating paypal payment",
@@ -63,7 +62,7 @@ const createOrder = async (req, res) => {
           cartId,
           cartItems,
           addressInfo,
-          orderStatus,
+          orderStatus: orderStatus || "pending", // Ensure default status
           paymentMethod,
           paymentStatus,
           totalAmount,
@@ -90,7 +89,7 @@ const createOrder = async (req, res) => {
     console.log(e);
     res.status(500).json({
       success: false,
-      message: "Some error occured!",
+      message: "Some error occurred!",
     });
   }
 };
@@ -142,7 +141,7 @@ const capturePayment = async (req, res) => {
     console.log(e);
     res.status(500).json({
       success: false,
-      message: "Some error occured!",
+      message: "Some error occurred!",
     });
   }
 };
@@ -151,7 +150,10 @@ const getAllOrdersByUser = async (req, res) => {
   try {
     const { userId } = req.params;
 
-    const orders = await Order.find({ userId });
+    const orders = await Order.find({ userId }).populate(
+      "assignedDeliveryGuy",
+      "userName email"
+    );
 
     if (!orders.length) {
       return res.status(404).json({
@@ -168,7 +170,7 @@ const getAllOrdersByUser = async (req, res) => {
     console.log(e);
     res.status(500).json({
       success: false,
-      message: "Some error occured!",
+      message: "Some error occurred!",
     });
   }
 };
@@ -177,7 +179,10 @@ const getOrderDetails = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const order = await Order.findById(id);
+    const order = await Order.findById(id).populate(
+      "assignedDeliveryGuy",
+      "userName email"
+    );
 
     if (!order) {
       return res.status(404).json({
@@ -194,7 +199,79 @@ const getOrderDetails = async (req, res) => {
     console.log(e);
     res.status(500).json({
       success: false,
-      message: "Some error occured!",
+      message: "Some error occurred!",
+    });
+  }
+};
+
+const confirmDelivery = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { confirmed, disputeReason } = req.body;
+    console.log(confirmed, "confirmed");
+    console.log(disputeReason, "disputeReason");
+    console.log(id, "id");
+
+    // Ensure the user is authenticated
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized: User not authenticated",
+      });
+    }
+
+    const order = await Order.findById(id);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    // Ensure the user making the request is the one who placed the order
+    if (order.userId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden: You can only confirm your own orders",
+      });
+    }
+
+    // Allow confirmation when status is "outForDelivery"
+    if (order.orderStatus !== "outForDelivery") {
+      return res.status(400).json({
+        success: false,
+        message: "Order is not in a state to be confirmed or disputed",
+      });
+    }
+
+    if (confirmed) {
+      order.orderStatus = "delivered";
+      order.orderUpdateDate = new Date();
+    } else {
+      if (!disputeReason || !disputeReason.trim()) {
+        return res.status(400).json({
+          success: false,
+          message: "Dispute reason is required",
+        });
+      }
+      order.orderStatus = "disputed";
+      order.disputeReason = disputeReason;
+      order.orderUpdateDate = new Date();
+    }
+
+    await order.save();
+
+    res.status(200).json({
+      success: true,
+      message: confirmed ? "Delivery confirmed" : "Delivery disputed",
+      data: order,
+    });
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({
+      success: false,
+      message: "Some error occurred!",
     });
   }
 };
@@ -204,4 +281,5 @@ module.exports = {
   capturePayment,
   getAllOrdersByUser,
   getOrderDetails,
+  confirmDelivery,
 };

@@ -60,7 +60,7 @@ const loginUser = async (req, res) => {
         email: checkUser.email,
         userName: checkUser.userName,
       },
-      "secret key for jwt",
+      process.env.JWT_SECRET_KEY || "secret key for jwt",
       {
         expiresIn: "1d",
       }
@@ -68,7 +68,8 @@ const loginUser = async (req, res) => {
     res
       .cookie("token", token, {
         httpOnly: true,
-        secure: false,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
       })
       .json({
         success: true,
@@ -84,7 +85,7 @@ const loginUser = async (req, res) => {
     console.log(e);
     res.status(500).json({
       success: false,
-      message: "Some error occured!",
+      message: "Some error occurred!",
     });
   }
 };
@@ -108,20 +109,36 @@ const logoutUser = async (req, res) => {
 const authMiddleware = async (req, res, next) => {
   const token = req.cookies.token;
   if (!token) {
+    console.log("No token provided in cookies");
     return res.status(401).json({
       success: false,
-      message: "Unauthorized",
+      message: "Unauthorized: No token provided",
     });
   }
+
   try {
-    const decoded = jwt.verify(token, "secret key for jwt");
-    req.user = decoded;
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET_KEY || "secret key for jwt"
+    );
+    const user = await User.findById(decoded.id);
+
+    if (!user) {
+      console.log("User not found for token:", decoded.id);
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized: User not found",
+      });
+    }
+
+    req.user = user;
     next();
   } catch (e) {
-    console.log(e);
+    console.log("Authentication error:", e.message);
     return res.status(401).json({
       success: false,
-      message: "Unauthorized",
+      message: "Unauthorized: Invalid token",
+      error: e.message,
     });
   }
 };

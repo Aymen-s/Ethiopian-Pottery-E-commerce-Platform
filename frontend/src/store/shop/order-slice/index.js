@@ -7,6 +7,7 @@ const initialState = {
   orderId: null,
   orderList: [],
   orderDetails: null,
+  deliveryOrders: [],
 };
 
 export const createNewOrder = createAsyncThunk(
@@ -16,7 +17,6 @@ export const createNewOrder = createAsyncThunk(
       `${import.meta.env.VITE_API_URL}/api/shop/order/create`,
       orderData
     );
-
     return response.data;
   }
 );
@@ -32,7 +32,6 @@ export const capturePayment = createAsyncThunk(
         orderId,
       }
     );
-
     return response.data;
   }
 );
@@ -43,7 +42,6 @@ export const getAllOrdersByUserId = createAsyncThunk(
     const response = await axios.get(
       `${import.meta.env.VITE_API_URL}/api/shop/order/list/${userId}`
     );
-
     return response.data;
   }
 );
@@ -54,8 +52,42 @@ export const getOrderDetails = createAsyncThunk(
     const response = await axios.get(
       `${import.meta.env.VITE_API_URL}/api/shop/order/details/${id}`
     );
-
     return response.data;
+  }
+);
+
+export const fetchDeliveryOrders = createAsyncThunk(
+  "/order/fetchDeliveryOrders",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/delivery/orders`,
+        {
+          withCredentials: true,
+        }
+      );
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(err.response.data);
+    }
+  }
+);
+
+export const confirmDelivery = createAsyncThunk(
+  "/order/confirmDelivery",
+  async ({ id, confirmed, disputeReason }, { rejectWithValue }) => {
+    try {
+      const response = await axios.patch(
+        `${import.meta.env.VITE_API_URL}/api/shop/order/confirm-delivery/${id}`,
+        { confirmed, disputeReason },
+        {
+          withCredentials: true,
+        }
+      );
+      return response.data;
+    } catch (err) {
+      return rejectWithValue(err.response.data);
+    }
   }
 );
 
@@ -107,6 +139,38 @@ const shoppingOrderSlice = createSlice({
       .addCase(getOrderDetails.rejected, (state) => {
         state.isLoading = false;
         state.orderDetails = null;
+      })
+      .addCase(fetchDeliveryOrders.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(fetchDeliveryOrders.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.deliveryOrders = action.payload.data;
+      })
+      .addCase(fetchDeliveryOrders.rejected, (state) => {
+        state.isLoading = false;
+        state.deliveryOrders = [];
+      })
+      .addCase(confirmDelivery.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(confirmDelivery.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.orderList = state.orderList.map((order) =>
+          order._id === action.payload.data._id ? action.payload.data : order
+        );
+        state.deliveryOrders = state.deliveryOrders.map((order) =>
+          order._id === action.payload.data._id ? action.payload.data : order
+        );
+        if (
+          state.orderDetails &&
+          state.orderDetails._id === action.payload.data._id
+        ) {
+          state.orderDetails = action.payload.data;
+        }
+      })
+      .addCase(confirmDelivery.rejected, (state) => {
+        state.isLoading = false;
       });
   },
 });

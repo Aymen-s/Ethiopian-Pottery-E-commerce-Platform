@@ -16,8 +16,6 @@ function ShoppingCheckout() {
   const [isPaymentStart, setIsPaymemntStart] = useState(false);
   const dispatch = useDispatch();
 
-  console.log(currentSelectedAddress, "cartItems");
-
   const totalCartAmount =
     cartItems && cartItems.items && cartItems.items.length > 0
       ? cartItems.items.reduce(
@@ -36,19 +34,17 @@ function ShoppingCheckout() {
       toast.error("Your cart is empty", {
         description: "Please add items to proceed",
       });
-
       return;
     }
     if (currentSelectedAddress === null) {
       toast.error("No address selected", {
         description: "Please select one address to proceed",
       });
-
       return;
     }
 
     const orderData = {
-      userId: user?.id,
+      userId: user?._id,
       cartId: cartItems?._id,
       cartItems: cartItems.items.map((singleCartItem) => ({
         productId: singleCartItem?.productId,
@@ -79,7 +75,6 @@ function ShoppingCheckout() {
     };
 
     dispatch(createNewOrder(orderData)).then((data) => {
-      console.log(data, "sangam");
       if (data?.payload?.success) {
         setIsPaymemntStart(true);
         toast.success("Order Created", {
@@ -101,33 +96,136 @@ function ShoppingCheckout() {
   }
 
   return (
-    <div className="flex flex-col">
-      <div className="relative h-[300px] w-full overflow-hidden">
-        <img src={img} className="h-full w-full object-cover object-center" />
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Hero Section */}
+      <div className="relative rounded-2xl overflow-hidden shadow-lg mb-8">
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-500 opacity-90"></div>
+        <div className="relative h-64 flex items-center justify-center">
+          <img
+            src={img}
+            className="h-full w-full object-cover object-center"
+            alt="Checkout Banner"
+          />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <h1 className="text-4xl font-bold text-black"></h1>
+          </div>
+        </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-5 p-5">
-        <Address
-          selectedId={currentSelectedAddress}
-          setCurrentSelectedAddress={setCurrentSelectedAddress}
-        />
-        <div className="flex flex-col gap-4">
-          {cartItems && cartItems.items && cartItems.items.length > 0
-            ? cartItems.items.map((item) => (
-                <UserCartItemsContent cartItem={item} />
+
+      {/* Main Content */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Address Section */}
+        <div className="bg-white rounded-xl shadow-md p-6">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">
+            Shipping Information
+          </h2>
+          <Address
+            selectedId={currentSelectedAddress}
+            setCurrentSelectedAddress={setCurrentSelectedAddress}
+          />
+        </div>
+
+        {/* Order Summary */}
+        <div className="bg-white rounded-xl shadow-md p-6">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">
+            Order Summary
+          </h2>
+
+          {/* Cart Items */}
+          <div className="space-y-6 mb-6">
+            {cartItems && cartItems.items && cartItems.items.length > 0 ? (
+              cartItems.items.map((item) => (
+                <UserCartItemsContent key={item.productId} cartItem={item} />
               ))
-            : null}
-          <div className="mt-8 space-y-4">
-            <div className="flex justify-between">
-              <span className="font-bold">Total</span>
-              <span className="font-bold">${totalCartAmount}</span>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-500">Your cart is empty</p>
+              </div>
+            )}
+          </div>
+
+          {/* Order Total */}
+          <div className="border-t border-gray-200 pt-6">
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-lg font-medium text-gray-700">
+                Subtotal
+              </span>
+              <span className="text-lg font-medium">
+                {totalCartAmount.toFixed(2)} ETB
+              </span>
+            </div>
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-lg font-medium text-gray-700">
+                Shipping
+              </span>
+              <span className="text-lg font-medium">Free</span>
+            </div>
+            <div className="flex justify-between items-center mb-6">
+              <span className="text-lg font-medium text-gray-700">Tax</span>
+              <span className="text-lg font-medium">
+                Calculated at checkout
+              </span>
+            </div>
+            <div className="flex justify-between items-center border-t border-gray-200 pt-4">
+              <span className="text-xl font-bold text-gray-900">Total</span>
+              <span className="text-xl font-bold text-gray-900">
+                {totalCartAmount.toFixed(2)} ETB
+              </span>
             </div>
           </div>
-          <div className="mt-4 w-full">
-            <Button onClick={handleInitiatePaypalPayment} className="w-full">
-              {isPaymentStart
-                ? "Processing Paypal Payment..."
-                : "Checkout with Paypal"}
-            </Button>
+
+          {/* Checkout Button */}
+          <Button
+            onClick={handleInitiatePaypalPayment}
+            className="w-full mt-8 py-6 text-lg bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 cursor-pointer"
+            disabled={isPaymentStart}
+          >
+            {isPaymentStart ? (
+              <span className="flex items-center justify-center">
+                <svg
+                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                Processing Payment...
+              </span>
+            ) : (
+              "Proceed to PayPal Checkout"
+            )}
+          </Button>
+
+          {/* Security Info */}
+          <div className="mt-6 flex items-center justify-center text-sm text-gray-500">
+            <svg
+              className="h-5 w-5 mr-2 text-green-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+              ></path>
+            </svg>
+            Secure SSL Encryption
           </div>
         </div>
       </div>

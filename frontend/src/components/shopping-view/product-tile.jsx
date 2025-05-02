@@ -62,11 +62,11 @@ function ShoppingProductTile({
                   : "text-amber-700"
               }`}
             >
-              ${product?.price}
+              {product?.price} ETB
             </span>
             {product?.salePrice > 0 && (
               <span className="text-lg font-bold text-amber-700">
-                ${product?.salePrice}
+                {product?.salePrice} ETB
               </span>
             )}
           </div>
@@ -81,9 +81,9 @@ function ShoppingProductTile({
           <Button
             onClick={(e) => {
               e.stopPropagation();
-              handleAddtoCart(product?._id, product?.totalStock);
+              handleAddtoCart(product?._id); // Only pass productId
             }}
-            className="w-full bg-amber-600 hover:bg-amber-700"
+            className="w-full bg-amber-600 hover:bg-amber-700 cursor-pointer"
           >
             Add to cart
           </Button>

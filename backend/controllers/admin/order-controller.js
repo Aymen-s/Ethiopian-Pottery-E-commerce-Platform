@@ -2,7 +2,10 @@ const Order = require("../../models/Order");
 
 const getAllOrdersOfAllUsers = async (req, res) => {
   try {
-    const orders = await Order.find({});
+    const orders = await Order.find({}).populate(
+      "assignedDeliveryGuy",
+      "userName email"
+    );
 
     if (!orders.length) {
       return res.status(404).json({
@@ -19,7 +22,7 @@ const getAllOrdersOfAllUsers = async (req, res) => {
     console.log(e);
     res.status(500).json({
       success: false,
-      message: "Some error occured!",
+      message: "Some error occurred!",
     });
   }
 };
@@ -28,7 +31,10 @@ const getOrderDetailsForAdmin = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const order = await Order.findById(id);
+    const order = await Order.findById(id).populate(
+      "assignedDeliveryGuy",
+      "userName email"
+    );
 
     if (!order) {
       return res.status(404).json({
@@ -45,7 +51,7 @@ const getOrderDetailsForAdmin = async (req, res) => {
     console.log(e);
     res.status(500).json({
       success: false,
-      message: "Some error occured!",
+      message: "Some error occurred!",
     });
   }
 };
@@ -53,7 +59,7 @@ const getOrderDetailsForAdmin = async (req, res) => {
 const updateOrderStatus = async (req, res) => {
   try {
     const { id } = req.params;
-    const { orderStatus } = req.body;
+    const { orderStatus, assignedDeliveryGuy } = req.body;
 
     const order = await Order.findById(id);
 
@@ -64,16 +70,21 @@ const updateOrderStatus = async (req, res) => {
       });
     }
 
-    const updatedOrder = await Order.findByIdAndUpdate(
-      id,
-      { orderStatus },
-      { new: true } // Return the updated document
-    );
+    if (orderStatus) {
+      order.orderStatus = orderStatus;
+      order.orderUpdateDate = new Date();
+    }
+
+    if (assignedDeliveryGuy) {
+      order.assignedDeliveryGuy = assignedDeliveryGuy;
+    }
+
+    const updatedOrder = await order.save();
 
     res.status(200).json({
       success: true,
-      message: "Order status is updated successfully!",
-      data: updatedOrder, // Include the updated order
+      message: "Order updated successfully!",
+      data: updatedOrder,
     });
   } catch (e) {
     console.log(e);

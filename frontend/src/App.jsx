@@ -22,16 +22,21 @@ import PaypalReturnPage from "./pages/shopping-view/paypal-return";
 import PaymentSuccessPage from "./pages/shopping-view/payment-success";
 import SearchProducts from "./pages/shopping-view/search";
 import LandingPage from "./pages/landing-page";
+import DeliveryOrdersView from "./pages/delivery-view/delivery-orders";
 
 const LandingPageRedirect = () => {
-  const { isAuthenticated } = useSelector((state) => state.auth);
+  const { isAuthenticated, isLoading } = useSelector((state) => state.auth);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (!isLoading && isAuthenticated) {
       navigate("/shop/home");
     }
-  }, [isAuthenticated, navigate]);
+  }, [isLoading, isAuthenticated, navigate]);
+
+  if (isLoading) {
+    return <Skeleton className="w-[100px] h-[20px] rounded-full" />;
+  }
 
   return !isAuthenticated ? <LandingPage /> : null;
 };
@@ -47,7 +52,7 @@ function App() {
   }, [dispatch]);
 
   if (isLoading) {
-    return <Skeleton className="w-[100px] h-[20px] rounded-full " />;
+    return <Skeleton className="w-[100px] h-[20px] rounded-full" />;
   }
 
   return (
@@ -78,6 +83,14 @@ function App() {
           <Route path="features" element={<AdminDashboard />} />
           <Route path="orders" element={<AdminOrders />} />
         </Route>
+        <Route
+          path="/delivery"
+          element={
+            <CheckAuth isAuthenticated={isAuthenticated} user={user}>
+              <DeliveryOrdersView />
+            </CheckAuth>
+          }
+        />
         <Route
           path="/shop"
           element={

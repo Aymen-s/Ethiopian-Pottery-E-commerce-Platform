@@ -16,10 +16,10 @@ import {
   fetchAllFilteredProducts,
   fetchProductDetails,
 } from "@/store/shop/products-slice";
-import { ArrowUpDownIcon } from "lucide-react";
+import { ArrowUpDownIcon, SearchIcon } from "lucide-react"; // Added SearchIcon import
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 
 function createSearchParamsHelper(filterParams) {
@@ -37,6 +37,7 @@ function createSearchParamsHelper(filterParams) {
 
 function ShoppingListing() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { productList, productDetails, isLoading } = useSelector(
     (state) => state.shopProducts
   );
@@ -59,10 +60,8 @@ function ShoppingListing() {
       initialFilters.cooperative = cooperative.split(",").filter(Boolean);
     }
 
-    // Merge with sessionStorage filters (if any)
     const storedFilters = JSON.parse(sessionStorage.getItem("filters"));
 
-    // If no URL params and storedFilters is empty or null, reset filters to {}
     const mergedFilters =
       !category &&
       !cooperative &&
@@ -107,16 +106,33 @@ function ShoppingListing() {
     dispatch(fetchProductDetails(getCurrentProductId));
   }
 
-  function handleAddtoCart(getCurrentProductId, getTotalStock) {
-    let getCartItems = cartItems.items || [];
+  function handleAddtoCart(getCurrentProductId) {
+    // if (!user || !user._id) {
+    //   toast.error("Please log in to add items to your cart", {
+    //     description: "Redirecting to login page...",
+    //   });
+    //   setTimeout(() => {
+    //     navigate("/auth/login");
+    //   }, 1500);
+    //   return;
+    // }
 
+    const product = productList.find(
+      (item) => item._id === getCurrentProductId
+    );
+    if (!product) {
+      toast.error("Product not found");
+      return;
+    }
+
+    let getCartItems = cartItems.items || [];
     if (getCartItems.length) {
       const indexOfCurrentItem = getCartItems.findIndex(
         (item) => item.productId === getCurrentProductId
       );
       if (indexOfCurrentItem > -1) {
         const getQuantity = getCartItems[indexOfCurrentItem].quantity;
-        if (getQuantity + 1 > getTotalStock) {
+        if (getQuantity + 1 > product.totalStock) {
           toast.error(
             `Only ${getQuantity} quantity can be added for this item`
           );
@@ -127,14 +143,27 @@ function ShoppingListing() {
 
     dispatch(
       addToCart({
-        userId: user?.id,
         productId: getCurrentProductId,
         quantity: 1,
       })
     ).then((data) => {
       if (data?.payload?.success) {
-        dispatch(fetchCartItems(user?.id));
+        dispatch(fetchCartItems());
         toast.success("Product is added to cart");
+      } else {
+        const errorMessage = data?.payload?.message || "An error occurred";
+        console.error("Add to Cart Error:", data?.payload);
+        toast.error("Failed to add product to cart", {
+          description: errorMessage,
+        });
+        if (
+          errorMessage.includes("Unauthorized") ||
+          errorMessage.includes("Token has expired")
+        ) {
+          setTimeout(() => {
+            navigate("/auth/login");
+          }, 1500);
+        }
       }
     });
   }
@@ -148,7 +177,7 @@ function ShoppingListing() {
       const createQueryString = createSearchParamsHelper(filters);
       setSearchParams(new URLSearchParams(createQueryString));
     } else {
-      setSearchParams(new URLSearchParams()); // Clear query params if filters are empty
+      setSearchParams(new URLSearchParams());
     }
   }, [filters, setSearchParams]);
 
@@ -164,33 +193,50 @@ function ShoppingListing() {
     if (productDetails !== null) setOpenDetailsDialog(true);
   }, [productDetails]);
 
+  // Get current sort label for display
+  const currentSortLabel =
+    sortOptions.find((item) => item.id === sort)?.label || "Sort by";
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-6 p-4 md:p-6">
-      <ProductFilter filters={filters} handleFilter={handleFilter} />
-      <div className="bg-background w-full rounded-lg shadow-sm">
-        <div className="p-4 border-b flex items-center justify-between">
-          <h2 className="text-lg font-extrabold">All Pottery</h2>
-          <div className="flex items-center gap-3">
-            <span className="text-muted-foreground">
-              {productList?.length} Items
+    <div className="grid grid-cols-1 md:grid-cols-[250px_1fr] gap-8 p-4 md:p-8">
+      {/* Filter Sidebar */}
+      <div className="bg-white rounded-lg shadow-sm border p-6 h-fit sticky top-4 max-h-[calc(100vh-32px)] overflow-y-auto">
+        <h3 className="text-lg font-bold mb-4 text-gray-900">Filters</h3>
+        <ProductFilter filters={filters} handleFilter={handleFilter} />
+      </div>
+
+      {/* Main Content */}
+      <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+        {/* Header */}
+        <div className="p-6 border-b flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">All Pottery</h2>
+            <p className="text-gray-500 mt-1">
+              Discover traditional Ethiopian craftsmanship
+            </p>
+          </div>
+          <div className="flex items-center gap-4">
+            <span className="text-gray-600">
+              {productList?.length}{" "}
+              {productList?.length === 1 ? "Item" : "Items"}
             </span>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
-                  size="sm"
-                  className="flex items-center gap-1"
+                  className="flex items-center gap-2 border-gray-300 hover:bg-gray-50 min-w-[150px] justify-between"
                 >
-                  <ArrowUpDownIcon className="h-4 w-4" />
-                  <span>Sort by</span>
+                  <span className="truncate">{currentSortLabel}</span>
+                  <ArrowUpDownIcon className="h-4 w-4 flex-shrink-0" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-[200px]">
+              <DropdownMenuContent align="end" className="w-[220px]">
                 <DropdownMenuRadioGroup value={sort} onValueChange={handleSort}>
                   {sortOptions.map((sortItem) => (
                     <DropdownMenuRadioItem
                       value={sortItem.id}
                       key={sortItem.id}
+                      className="cursor-pointer hover:bg-gray-50"
                     >
                       {sortItem.label}
                     </DropdownMenuRadioItem>
@@ -200,14 +246,20 @@ function ShoppingListing() {
             </DropdownMenu>
           </div>
         </div>
+
+        {/* Product Grid */}
         {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
-            {[...Array(4)].map((_, index) => (
-              <Skeleton key={index} className="h-96 w-full rounded-lg" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-6">
+            {[...Array(8)].map((_, index) => (
+              <div key={index} className="space-y-4">
+                <Skeleton className="h-64 w-full rounded-lg" />
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+              </div>
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-6">
             {productList && productList.length > 0 ? (
               productList.map((productItem) => (
                 <ShoppingProductTile
@@ -218,11 +270,32 @@ function ShoppingListing() {
                 />
               ))
             ) : (
-              <p className="text-center col-span-full">No products found.</p>
+              <div className="col-span-full py-12 text-center">
+                <div className="mx-auto max-w-md space-y-4">
+                  <SearchIcon className="h-12 w-12 mx-auto text-gray-400" />
+                  <h3 className="text-xl font-medium text-gray-900">
+                    No products found
+                  </h3>
+                  <p className="text-gray-500">
+                    Try adjusting your filters to find what you're looking for
+                  </p>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setFilters({});
+                      setSort("price-lowtohigh");
+                    }}
+                    className="mt-4"
+                  >
+                    Clear all filters
+                  </Button>
+                </div>
+              </div>
             )}
           </div>
         )}
       </div>
+
       <ProductDetailsDialog
         open={openDetailsDialog}
         setOpen={setOpenDetailsDialog}

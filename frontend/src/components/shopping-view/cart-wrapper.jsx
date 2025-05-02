@@ -31,7 +31,7 @@ function UserCartWrapper({ cartItems = [], setOpenCartSheet }) {
       <div className="mt-8 space-y-4">
         <div className="flex justify-between p-4">
           <span className="font-bold">Total</span>
-          <span className="font-bold">${totalCartAmount.toFixed(2)}</span>
+          <span className="font-bold">{totalCartAmount.toFixed(2)} ETB</span>
         </div>
       </div>
       <Button
@@ -39,7 +39,7 @@ function UserCartWrapper({ cartItems = [], setOpenCartSheet }) {
           navigate("/shop/checkout");
           setOpenCartSheet(false);
         }}
-        className="w-[90%] mt-6 mx-auto"
+        className="w-[90%] mt-6 mx-auto cursor-pointer"
       >
         Checkout
       </Button>

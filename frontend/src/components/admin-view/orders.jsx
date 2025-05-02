@@ -23,15 +23,19 @@ import { Loader2 } from "lucide-react";
 
 function AdminOrdersView() {
   const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
-  const [loadingDetailsId, setLoadingDetailsId] = useState(null); // Track which order is loading details
+  const [loadingDetailsId, setLoadingDetailsId] = useState(null);
+  const [lastFetchedOrderId, setLastFetchedOrderId] = useState(null);
   const { orderList, orderDetails, isLoading } = useSelector(
     (state) => state.adminOrder
   );
   const dispatch = useDispatch();
 
   function handleFetchOrderDetails(getId) {
-    setLoadingDetailsId(getId); // Set the loading ID for the clicked order
-    dispatch(getOrderDetailsForAdmin(getId));
+    if (loadingDetailsId !== getId) {
+      setLoadingDetailsId(getId);
+      setLastFetchedOrderId(getId);
+      dispatch(getOrderDetailsForAdmin(getId));
+    }
   }
 
   useEffect(() => {
@@ -39,11 +43,15 @@ function AdminOrdersView() {
   }, [dispatch]);
 
   useEffect(() => {
-    if (orderDetails !== null) {
+    if (
+      orderDetails !== null &&
+      orderDetails._id === lastFetchedOrderId &&
+      !openDetailsDialog
+    ) {
       setOpenDetailsDialog(true);
-      setLoadingDetailsId(null); // Reset loading ID once details are fetched
+      setLoadingDetailsId(null);
     }
-  }, [orderDetails]);
+  }, [orderDetails, lastFetchedOrderId, openDetailsDialog]);
 
   return (
     <Card>
@@ -51,13 +59,14 @@ function AdminOrdersView() {
         <CardTitle>All Orders</CardTitle>
       </CardHeader>
       <CardContent>
-        {isLoading ? (
+        {isLoading && !orderList?.length ? (
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Order ID</TableHead>
                 <TableHead>Order Date</TableHead>
                 <TableHead>Order Status</TableHead>
+                <TableHead>Assigned Delivery Guy</TableHead>
                 <TableHead>Order Price</TableHead>
                 <TableHead>
                   <span className="sr-only">Details</span>
@@ -72,6 +81,9 @@ function AdminOrdersView() {
                   </TableCell>
                   <TableCell>
                     <Skeleton className="h-6 w-24" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-6 w-20" />
                   </TableCell>
                   <TableCell>
                     <Skeleton className="h-6 w-20" />
@@ -93,6 +105,7 @@ function AdminOrdersView() {
                 <TableHead>Order ID</TableHead>
                 <TableHead>Order Date</TableHead>
                 <TableHead>Order Status</TableHead>
+                <TableHead>Assigned Delivery Guy</TableHead>
                 <TableHead>Order Price</TableHead>
                 <TableHead>
                   <span className="sr-only">Details</span>
@@ -110,27 +123,35 @@ function AdminOrdersView() {
                         className={`py-1 px-3 ${
                           orderItem?.orderStatus === "delivered"
                             ? "bg-green-500"
-                            : orderItem?.orderStatus === "rejected"
+                            : orderItem?.orderStatus === "disputed"
                             ? "bg-red-600"
                             : orderItem?.orderStatus === "inShipping"
                             ? "bg-blue-500"
-                            : orderItem?.orderStatus === "inProcess"
-                            ? "bg-yellow-500"
                             : orderItem?.orderStatus === "pending"
                             ? "bg-gray-500"
+                            : orderItem?.orderStatus === "outForDelivery"
+                            ? "bg-purple-500"
                             : "bg-black"
                         }`}
                       >
                         {orderItem?.orderStatus}
                       </Badge>
                     </TableCell>
-                    <TableCell>${orderItem?.totalAmount}</TableCell>
+                    <TableCell>
+                      {orderItem?.assignedDeliveryGuy
+                        ? orderItem.assignedDeliveryGuy.userName
+                        : "Not Assigned"}
+                    </TableCell>
+                    <TableCell>{orderItem?.totalAmount} ETB</TableCell>
                     <TableCell>
                       <Dialog
                         open={openDetailsDialog}
-                        onOpenChange={() => {
-                          setOpenDetailsDialog(false);
-                          dispatch(resetOrderDetails());
+                        onOpenChange={(open) => {
+                          setOpenDetailsDialog(open);
+                          if (!open) {
+                            dispatch(resetOrderDetails());
+                            setLastFetchedOrderId(null);
+                          }
                         }}
                       >
                         <Button
@@ -153,7 +174,7 @@ function AdminOrdersView() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center">
+                  <TableCell colSpan={6} className="text-center">
                     No orders found.
                   </TableCell>
                 </TableRow>

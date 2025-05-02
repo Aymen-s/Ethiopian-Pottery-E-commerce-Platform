@@ -4,13 +4,31 @@ const mongoose = require("mongoose");
 
 const addToCart = async (req, res) => {
   try {
-    const { productId, quantity, userId } = req.body;
-    if (!productId || !quantity || !userId) {
-      return res.status(400).json({
+    const { productId, quantity } = req.body;
+
+    // Get userId from authMiddleware
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({
         success: false,
-        message: "Invalid data. Please provide all required fields.",
+        message: "Unauthorized: User not authenticated",
       });
     }
+    const userId = req.user._id;
+
+    if (!productId || !quantity) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid data. Product ID and quantity are required.",
+      });
+    }
+
+    if (quantity <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Quantity must be greater than 0",
+      });
+    }
+
     const product = await Product.findById(productId);
     if (!product) {
       return res.status(404).json({
@@ -18,6 +36,7 @@ const addToCart = async (req, res) => {
         message: "Product not found",
       });
     }
+
     let cart = await Cart.findOne({ userId });
     if (!cart) {
       cart = new Cart({ userId, items: [] });
@@ -31,6 +50,7 @@ const addToCart = async (req, res) => {
     } else {
       cart.items.push({ productId, quantity });
     }
+
     await cart.save();
     res.status(200).json({
       success: true,
@@ -45,13 +65,21 @@ const addToCart = async (req, res) => {
 
 const fetchCartItems = async (req, res) => {
   try {
-    const { userId } = req.params;
-    if (!userId) {
-      return res.status(400).json({
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({
         success: false,
-        message: "Invalid data. Please provide all required fields.",
+        message: "Unauthorized: User not authenticated",
       });
     }
+
+    const userId = req.user._id;
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid userId format",
+      });
+    }
+
     const cart = await Cart.findOne({ userId }).populate({
       path: "items.productId",
       select: "title price image salePrice",
@@ -94,13 +122,23 @@ const fetchCartItems = async (req, res) => {
 
 const updateCartItemQty = async (req, res) => {
   try {
-    const { productId, quantity, userId } = req.body;
-    if (!productId || !quantity || !userId) {
-      return res.status(400).json({
+    const { productId, quantity } = req.body;
+
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({
         success: false,
-        message: "Invalid data. Please provide all required fields.",
+        message: "Unauthorized: User not authenticated",
       });
     }
+    const userId = req.user._id;
+
+    if (!productId || !quantity) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid data. Product ID and quantity are required.",
+      });
+    }
+
     const cart = await Cart.findOne({ userId });
     if (!cart) {
       return res.status(404).json({
@@ -151,12 +189,20 @@ const updateCartItemQty = async (req, res) => {
 
 const deleteCartItem = async (req, res) => {
   try {
-    const { productId, userId } = req.params;
+    const { productId } = req.params;
 
-    if (!productId || !userId) {
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized: User not authenticated",
+      });
+    }
+    const userId = req.user._id;
+
+    if (!productId) {
       return res.status(400).json({
         success: false,
-        message: "Invalid data. Please provide all required fields.",
+        message: "Invalid data. Product ID is required.",
       });
     }
 

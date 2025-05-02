@@ -1,87 +1,116 @@
 import { useSelector } from "react-redux";
 import { Badge } from "../ui/badge";
-import { DialogContent } from "../ui/dialog";
+import { DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Label } from "../ui/label";
 import { Separator } from "../ui/separator";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../ui/table";
 
 function ShoppingOrderDetailsView({ orderDetails }) {
   const { user } = useSelector((state) => state.auth);
 
   return (
-    <DialogContent className="sm:max-w-[600px]">
-      <div className="grid gap-6">
-        <div className="grid gap-2">
-          <div className="flex mt-6 items-center justify-between">
-            <p className="font-medium">Order ID</p>
-            <Label>{orderDetails?._id}</Label>
+    <DialogContent className="sm:max-w-2xl">
+      <DialogHeader className="border-b pb-4">
+        <DialogTitle>Order Details</DialogTitle>
+      </DialogHeader>
+
+      <div className="grid gap-6 py-4">
+        {/* Order Summary */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label className="text-muted-foreground">Order ID</Label>
+            <p>{orderDetails?._id}</p>
           </div>
-          <div className="flex mt-2 items-center justify-between">
-            <p className="font-medium">Order Date</p>
-            <Label>{orderDetails?.orderDate.split("T")[0]}</Label>
+          <div className="space-y-2">
+            <Label className="text-muted-foreground">Date</Label>
+            <p>{new Date(orderDetails?.orderDate).toLocaleDateString()}</p>
           </div>
-          <div className="flex mt-2 items-center justify-between">
-            <p className="font-medium">Order Price</p>
-            <Label>${orderDetails?.totalAmount}</Label>
+          <div className="space-y-2">
+            <Label className="text-muted-foreground">Status</Label>
+            <Badge
+              variant={
+                orderDetails?.orderStatus === "delivered"
+                  ? "success"
+                  : orderDetails?.orderStatus === "disputed"
+                  ? "destructive"
+                  : "default"
+              }
+            >
+              {orderDetails?.orderStatus}
+            </Badge>
           </div>
-          <div className="flex mt-2 items-center justify-between">
-            <p className="font-medium">Payment method</p>
-            <Label>{orderDetails?.paymentMethod}</Label>
-          </div>
-          <div className="flex mt-2 items-center justify-between">
-            <p className="font-medium">Payment Status</p>
-            <Label>{orderDetails?.paymentStatus}</Label>
-          </div>
-          <div className="flex mt-2 items-center justify-between">
-            <p className="font-medium">Order Status</p>
-            <Label>
-              <Badge
-                className={`py-1 px-3 ${
-                  orderDetails?.orderStatus === "delivered"
-                    ? "bg-green-500"
-                    : orderDetails?.orderStatus === "rejected"
-                    ? "bg-red-600"
-                    : orderDetails?.orderStatus === "inShipping"
-                    ? "bg-blue-500"
-                    : orderDetails?.orderStatus === "inProcess"
-                    ? "bg-yellow-500"
-                    : orderDetails?.orderStatus === "pending"
-                    ? "bg-gray-500"
-                    : "bg-black"
-                }`}
-              >
-                {orderDetails?.orderStatus}
-              </Badge>
-            </Label>
+          <div className="space-y-2">
+            <Label className="text-muted-foreground">Total</Label>
+            <p className="font-medium">{orderDetails?.totalAmount} ETB</p>
           </div>
         </div>
+
         <Separator />
-        <div className="grid gap-4">
-          <div className="grid gap-2">
-            <div className="font-medium">Order Details</div>
-            <ul className="grid gap-3">
-              {orderDetails?.cartItems && orderDetails?.cartItems.length > 0
-                ? orderDetails?.cartItems.map((item) => (
-                    <li className="flex items-center justify-between">
-                      <span>Title: {item.title}</span>
-                      <span>Quantity: {item.quantity}</span>
-                      <span>Price: ${item.price}</span>
-                    </li>
-                  ))
-                : null}
-            </ul>
+
+        {/* Order Items */}
+        <div className="space-y-4">
+          <h3 className="font-medium">Items</h3>
+          <div className="border rounded-lg overflow-hidden">
+            <Table>
+              <TableHeader className="bg-gray-50">
+                <TableRow>
+                  <TableHead>Product</TableHead>
+                  <TableHead className="text-right">Qty</TableHead>
+                  <TableHead className="text-right">Price</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {orderDetails?.cartItems?.map((item) => (
+                  <TableRow key={item.productId}>
+                    <TableCell>{item.title}</TableCell>
+                    <TableCell className="text-right">
+                      {item.quantity}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {item.price} ETB
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
         </div>
-        <div className="grid gap-4">
-          <div className="grid gap-2">
-            <div className="font-medium">Shipping Info</div>
-            <div className="grid gap-0.5 text-muted-foreground">
-              <span>{user.userName}</span>
-              <span>{orderDetails?.addressInfo?.address}</span>
-              <span>{orderDetails?.addressInfo?.city}</span>
-              <span>{orderDetails?.addressInfo?.pincode}</span>
-              <span>{orderDetails?.addressInfo?.phone}</span>
-              <span>{orderDetails?.addressInfo?.notes}</span>
+
+        <Separator />
+
+        {/* Shipping Info */}
+        <div className="space-y-4">
+          <h3 className="font-medium">Shipping Information</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <Label className="text-muted-foreground">Name</Label>
+              <p>{user?.userName}</p>
             </div>
+            <div className="space-y-1">
+              <Label className="text-muted-foreground">Phone</Label>
+              <p>{orderDetails?.addressInfo?.phone}</p>
+            </div>
+            <div className="space-y-1 col-span-2">
+              <Label className="text-muted-foreground">Address</Label>
+              <p>{orderDetails?.addressInfo?.address}</p>
+              <p>
+                {orderDetails?.addressInfo?.city},{" "}
+                {orderDetails?.addressInfo?.pincode}
+              </p>
+            </div>
+            {orderDetails?.addressInfo?.notes && (
+              <div className="space-y-1 col-span-2">
+                <Label className="text-muted-foreground">Notes</Label>
+                <p>{orderDetails?.addressInfo?.notes}</p>
+              </div>
+            )}
           </div>
         </div>
       </div>

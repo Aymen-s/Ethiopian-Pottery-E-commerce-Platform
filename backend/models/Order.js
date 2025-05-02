@@ -20,7 +20,19 @@ const OrderSchema = new mongoose.Schema({
     phone: String,
     notes: String,
   },
-  orderStatus: String,
+  orderStatus: {
+    type: String,
+    enum: [
+      "pending",
+      "confirmed",
+      "inShipping",
+      "outForDelivery",
+      "pendingConfirmation",
+      "delivered",
+      "disputed",
+    ],
+    default: "pending",
+  },
   paymentMethod: String,
   paymentStatus: String,
   totalAmount: Number,
@@ -28,6 +40,15 @@ const OrderSchema = new mongoose.Schema({
   orderUpdateDate: Date,
   paymentId: String,
   payerId: String,
+  assignedDeliveryGuy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    default: null,
+  },
+  disputeReason: {
+    type: String,
+    default: null,
+  },
 });
 
 module.exports = mongoose.model("Order", OrderSchema);

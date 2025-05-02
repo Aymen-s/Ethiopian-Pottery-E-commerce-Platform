@@ -43,11 +43,16 @@ function ShoppingHome() {
     (state) => state.shopProducts
   );
   const { featureImageList } = useSelector((state) => state.commonFeature);
+  const { user, isLoading: authLoading } = useSelector((state) => state.auth);
   const [openDetailsDialog, setOpenDetailsDialog] = useState(false);
-  const { user } = useSelector((state) => state.auth);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  // Debug user state on mount and changes
+  useEffect(() => {
+    console.log("ShoppingHome - Auth State:", { user, authLoading });
+  }, [user, authLoading]);
 
   function handleNavigateToListingPage(getCurrentItem, section) {
     const currentFilter = {
@@ -78,6 +83,46 @@ function ShoppingHome() {
     dispatch(fetchProductDetails(id));
   }
 
+  function handleAddtoCart(productId) {
+    // Check if auth is still loading
+    if (authLoading) {
+      toast.info("Please wait, checking authentication...");
+      return;
+    }
+
+    // Check if user is authenticated
+    // if (!user || !user.id) {
+    //   toast.error("Please log in to add items to your cart", {
+    //     description: "Redirecting to login page...",
+    //   });
+    //   setTimeout(() => {
+    //     navigate("/auth/login");
+    //   }, 1500);
+    //   return;
+    // }
+
+    dispatch(addToCart({ productId, quantity: 1 })).then((data) => {
+      if (data.payload.success) {
+        dispatch(fetchCartItems());
+        toast.success("Product added to cart");
+      } else {
+        const errorMessage = data?.payload?.message || "An error occurred";
+        console.error("Add to Cart Error:", data?.payload);
+        toast.error("Failed to add product to cart", {
+          description: errorMessage,
+        });
+        if (
+          errorMessage.includes("Unauthorized") ||
+          errorMessage.includes("Token has expired")
+        ) {
+          setTimeout(() => {
+            navigate("/auth/login");
+          }, 1500);
+        }
+      }
+    });
+  }
+
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % featureImageList.length);
@@ -90,30 +135,6 @@ function ShoppingHome() {
       setOpenDetailsDialog(true);
     }
   }, [productDetails]);
-
-  // const handleSlideChange = (direction) => {
-  //   if (isTransitioning) return;
-  //   setIsTransitioning(true);
-  //   setCurrentSlide((prev) =>
-  //     direction === "next"
-  //       ? (prev + 1) % featureImageList.length
-  //       : prev === 0
-  //       ? featureImageList.length - 1
-  //       : prev - 1
-  //   );
-  //   setTimeout(() => setIsTransitioning(false), 1000);
-  // };
-
-  function handleAddtoCart(productId) {
-    dispatch(addToCart({ userId: user.id, productId, quantity: 1 })).then(
-      (data) => {
-        if (data.payload.success) {
-          dispatch(fetchCartItems(user.id));
-          toast.success("Product added to cart");
-        }
-      }
-    );
-  }
 
   useEffect(() => {
     dispatch(
@@ -158,7 +179,6 @@ function ShoppingHome() {
             </div>
           </>
         )}
-        {/* Navigation buttons remain the same */}
       </div>
 
       {/* Categories Section */}
