@@ -75,12 +75,9 @@ function AdminProducts() {
   }
 
   function handleDelete(getCurrentProductId) {
-    dispatch(deleteProduct(getCurrentProductId)).then((data) => {
-      if (data?.payload?.success) {
-        dispatch(fetchAllProducts());
-        toast.success("Product deleted successfully");
-      }
-    });
+    dispatch(deleteProduct(getCurrentProductId));
+    dispatch(fetchAllProducts());
+    toast.success("Product deleted successfully");
   }
 
   function isFormValid() {

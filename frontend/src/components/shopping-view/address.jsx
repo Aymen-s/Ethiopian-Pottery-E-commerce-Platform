@@ -81,12 +81,9 @@ function Address({ setCurrentSelectedAddress, selectedId }) {
   function handleDeleteAddress(getCurrentAddress) {
     dispatch(
       deleteAddress({ userId: user?._id, addressId: getCurrentAddress._id })
-    ).then((data) => {
-      if (data?.payload?.success) {
-        dispatch(fetchAllAddresses(user?._id));
-        toast.success("Address deleted successfully");
-      }
-    });
+    );
+    dispatch(fetchAllAddresses(user?._id));
+    toast.success("Address deleted successfully");
   }
 
   function handleEditAddress(getCuurentAddress) {

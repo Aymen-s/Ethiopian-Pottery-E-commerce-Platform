@@ -12,13 +12,14 @@ const addProductReview = async (req, res) => {
       "cartItems.productId": productId,
       // orderStatus: "confirmed" || "delivered",
     });
+    console.log(order);
 
-    if (!order) {
-      return res.status(403).json({
-        success: false,
-        message: "You need to purchase product to review it.",
-      });
-    }
+    // if (!order) {
+    //   return res.status(403).json({
+    //     success: false,
+    //     message: "You need to purchase product to review it.",
+    //   });
+    // }
 
     const checkExistinfReview = await ProductReview.findOne({
       productId,
